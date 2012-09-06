@@ -12,6 +12,7 @@ The cPanel Manager plugin from [Worpit](http://worpit.com/?src=cpm_readme "Worpi
 offers you the ability to connect to your Web Hosting cPanel account.
 
 Currently you can:
+
 *	View a list of all MySQL database and their attached users.
 *	Download any MySQL database in your cPanel account directly from this plugin.
 *	Add a new MySQL database and a new MySQL user to that database.
@@ -22,7 +23,6 @@ Currently you can:
 *	View a list of all Parked Domains.
 *	View a list of all Addon Domains.
 *	View a list of all Cron Jobs.
-
 
 With it (in time) you will be able to perform many convenient functions from within your WordPress site that
 you would otherwise need to log into your cPanel to do.
