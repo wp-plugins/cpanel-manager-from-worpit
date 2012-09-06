@@ -88,9 +88,9 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 
 = 1.1 =
 
-ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
-ADDED: Permanent warning message if you don't have the mcrypt library extension loaded and your data isn't encrypted.
-CHANGED: Regardless of whether you can encrypt your data or not, cPanel username and password are serialized before being stored to WP DB.
+* ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
+* ADDED: Permanent warning message if you don't have the mcrypt library extension loaded and your data isn't encrypted.
+* CHANGED: Regardless of whether you can encrypt your data or not, cPanel username and password are serialized before being stored to WP DB.
 
 = 1.0 =
 
@@ -100,7 +100,7 @@ CHANGED: Regardless of whether you can encrypt your data or not, cPanel username
 
 = 1.1 =
 
-ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
+* ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
 
 = 1.0 =
 
