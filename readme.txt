@@ -4,7 +4,7 @@ Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
 Tested up to: 3.4
-Stable tag: 1.0
+Stable tag: 1.1
 
 == Description ==
 
@@ -31,6 +31,27 @@ Currently, with the initial release it will list your databases, your database u
 and also your crons.
 
 == Frequently Asked Questions ==
+
+= Is it secure to have my cPanel login credentials in my WordPress? =
+
+Normally, no. But with version 1.1 of the plugin, if you have the 'mcrypt' PHP library available on your web hosting
+your cPanel credentials will always be encrypted before being stored in your WordPress database.
+
+= What if I don't have the 'mcrypt' PHP extensions? =
+
+You will have a permanent notice on the plugin's admin pages telling you of this. The plugin will function as normal
+but your details will not be encrypted.
+
+= What is the Security Access Key? =
+
+This is basically an encryption salt/password. We use this to encrypt and decrypt your cPanel username and password.
+
+= What if I forget the Security Access Key? =
+
+Simply click the orange 'Reset' button on the plugin's security page. This will delete the current security access key,
+the stored cpanel username and the stored cpanel password.
+
+You will then need to supply a new Security Access Key (as you would have at the beginning) before adding any new cPanel information. 
 
 = What is the CONFIRM box all about? =
 
@@ -65,12 +86,22 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 
 == Changelog ==
 
-= 0.1 =
+= 1.1 =
+
+ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
+ADDED: Permanent warning message if you don't have the mcrypt library extension loaded and your data isn't encrypted.
+CHANGED: Regardless of whether you can encrypt your data or not, cPanel username and password are serialized before being stored to WP DB.
+
+= 1.0 =
 
 * First Release.
 
 == Upgrade Notice ==
 
-= 0.1 =
+= 1.1 =
+
+ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
+
+= 1.0 =
 
 * First Release.

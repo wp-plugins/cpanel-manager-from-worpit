@@ -3,7 +3,7 @@
 Plugin Name: cPanel Manager (from Worpit)
 Plugin URI: http://worpit.com/
 Description: A tool to connect to your Web Hosting cPanel account from within your WordPress.
-Version: 1.0
+Version: 1.1
 Author: Worpit
 Author URI: http://worpit.com/
 */
@@ -38,8 +38,10 @@ include_once( dirname(__FILE__).'/inc/lib/worpit/Worpit_CPanelTransformer.php' )
 class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	const OptionPrefix	= 'cpm_';
+	const SecurityAccessKeyCookieName = "worpitsakcook";
 	
 	protected $m_aPluginOptions_EnableSection;
+	protected $m_aPluginOptions_CpmEncryptSection;
 	protected $m_aPluginOptions_CpmCredentialsSection;
 	
 	protected $m_aSubmitMessages;
@@ -47,7 +49,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	protected $m_fSubmitCpmMainAttempt;
 	
-	static public $VERSION			= '1.0'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
+	static public $VERSION			= '1.1'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
 	
 	public function __construct(){
 		parent::__construct();
@@ -78,6 +80,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	protected function createPluginSubMenuItems(){
 		$this->m_aPluginMenu = array(
 				//Menu Page Title => Menu Item name, page ID (slug), callback function for this page - i.e. what to do/load.
+				$this->getSubmenuPageTitle( 'Security' ) => array( 'Security', $this->getSubmenuId('security'), 'onDisplayCpmSecurity' ),
 				$this->getSubmenuPageTitle( 'cPanel Connect' ) => array( 'cPanel Connect', $this->getSubmenuId('main'), 'onDisplayCpmMain' ),
 				$this->getSubmenuPageTitle( 'cPanel Tasks' ) => array( 'cPanel Tasks', $this->getSubmenuId('tasks'), 'onDisplayCpmCpanelTasks' ),
 			);
@@ -89,6 +92,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		if ( !current_user_can( 'manage_options' ) ) {
 			return;
 		}
+		$this->adminNoticeMcryptLibUnavailable();
 		$this->adminNoticeOptionsUpdated();
 		$this->adminNoticeVersionUpgrade();
 		$this->adminNoticeSubmitMessages();
@@ -127,6 +131,13 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 					array( 'enable_cpanel_manager_wordpress',	'',		'N', 		'checkbox',		'cPanel Manager', 'Enable cPanel Manager for WordPress Features', "Provides the ability to connect to your cPanel web hosting account." ),
 			),
 		);
+
+		$this->m_aPluginOptions_CpmEncryptSection = 	array(
+				'section_title' => 'cPanel Manager Encryption Settings',
+				'section_options' => array(
+					array( 'cpanel_security_access_key',	'',	'', 'text',	'Security Access Key:', '', 'Please supply a Security Access Key to protect your cPanel details.' ),
+			),
+		);
 		
 		$this->m_aPluginOptions_CpmCredentialsSection = 	array(
 				'section_title' => 'cPanel Connection Credentials',
@@ -138,7 +149,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 			),
 		);
 
-		$this->m_aAllPluginOptions = array( &$this->m_aPluginOptions_EnableSection, &$this->m_aPluginOptions_CpmCredentialsSection);
+		$this->m_aAllPluginOptions = array( &$this->m_aPluginOptions_EnableSection, &$this->m_aPluginOptions_CpmEncryptSection, &$this->m_aPluginOptions_CpmCredentialsSection);
 		
 		return true;
 		
@@ -157,6 +168,9 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 
 		//Don't need to run isset() because previous function does this
 		switch ( $_GET['page'] ) {
+			case $this->getSubmenuId('security'):
+				$this->handleSubmit_security( );
+				return;
 			case $this->getSubmenuId('main'):
 				if ( isset( $_POST[self::$OPTION_PREFIX.'all_options_input'] ) ) {
 					$this->handleSubmit_main( );
@@ -170,14 +184,92 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	}//handlePluginFormSubmit
 	
+	protected function handleSubmit_security() {
+
+		// Ensures we're actually getting this request from WP.
+		check_admin_referer( $this->getSubmenuId('security') );
+		
+		if ( isset( $_POST['submit_remove_access'] ) ) {
+			$this->turnSecureAccessOff( $sEncryptionSalt );
+			return;
+		}
+		
+		if ( isset( $_POST['submit_reset'] ) ) { //reset all cPanel credentials.
+			
+			$this->updateOption( 'cpanel_security_access_key', '' );
+			$this->updateOption( 'cpanel_username', '' );
+			$this->updateOption( 'cpanel_password', '' );
+			
+			$this->turnSecureAccessOff( $sEncryptionSalt );
+			
+			$this->m_aSubmitSuccess = true;
+			$this->m_aSubmitMessages[] = "Your Security Access Key, cPanel username, and cPanel password were all reset.";
+			return;
+		}
+		
+		// Check for encryption key password
+		if ( !isset( $_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'] ) || empty( $_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'] ) ) {
+			$this->m_aSubmitSuccess = false;
+			$this->m_aSubmitMessages[] = "Security Access Key was not processed because the field was empty.";
+			
+			return;
+		}
+		
+		$sCurrentSalt_md5 = $this->getOption( 'cpanel_security_access_key' );
+		$sEncryptionSalt = trim( $_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'] );
+		$sEncryptionSalt_md5 = md5( $sEncryptionSalt );
+		
+		if ( empty($sCurrentSalt_md5) ) { // the user has never stored a password before so store it now
+			
+			$this->updateOption( 'cpanel_security_access_key', $sEncryptionSalt_md5 );
+			
+			$this->turnSecureAccessOn( $sEncryptionSalt );
+
+			$this->m_aSubmitSuccess = true;
+			$this->m_aSubmitMessages[] = "You have successfully stored a new Security Access Key that will be used to encrypt your cPanel data: $sEncryptionSalt";
+		
+		} else {
+			
+			//Compare md5 hashes
+			if ( $sCurrentSalt_md5 === $sEncryptionSalt_md5 ) { //User supplied correct password
+				
+				$this->turnSecureAccessOn( $sEncryptionSalt );
+			
+				$this->m_aSubmitSuccess = true;
+				$this->m_aSubmitMessages[] = "You entered the correct Security Access Key. Your cPanel Manager is available until your login session expires.";
+			}
+			else {
+				$this->m_aSubmitSuccess = false;
+				$this->m_aSubmitMessages[] = "You didn't enter the correct password. Your cPanel Manager wont be available until you do, or you reset your cPanel credentials.";
+			}
+			
+		}
+		
+	}//handleSubmit_security
+	
+	private function turnSecureAccessOn( $sAccessKey ) {
+		$_COOKIE[ self::SecurityAccessKeyCookieName ] = $sAccessKey;
+		setcookie( self::SecurityAccessKeyCookieName, $sAccessKey, time()+3600, COOKIEPATH, COOKIE_DOMAIN, false );
+	}
+	private function turnSecureAccessOff( ) {
+		unset( $_COOKIE[ self::SecurityAccessKeyCookieName ] );
+		setcookie( self::SecurityAccessKeyCookieName, "", time()-3600, COOKIEPATH, COOKIE_DOMAIN, false);
+	}
+	
 	protected function handleSubmit_main() {
 
 		//Ensures we're actually getting this request from WP.
 		check_admin_referer( $this->getSubmenuId('main') );
 		
+		if ( !isset($_COOKIE[ self::SecurityAccessKeyCookieName ]) ) {
+			$this->m_aSubmitSuccess = false;
+			$this->m_aSubmitMessages[] = "Could not save cPanel details because Security Access Key is unavailable.";
+			return;
+		}
+		
 		$this->m_fSubmitCpmMainAttempt = true;
 		
-		//Validate all the entries.
+		//At this point, I'm storing all the presented values.
 		$sAddress = strtolower( $_POST[self::$OPTION_PREFIX.'cpanel_server_address'] );
 		$sAddress = preg_replace('/(\s|\*|\@|\&|\$)/', '', $sAddress);
 		$iPort = intval( trim($_POST[self::$OPTION_PREFIX.'cpanel_server_port']) );
@@ -195,7 +287,9 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		}
 		$_POST[self::$OPTION_PREFIX.'cpanel_server_address'] = $sAddress;
 		$_POST[self::$OPTION_PREFIX.'cpanel_server_port'] = $iPort;
-		$_POST[self::$OPTION_PREFIX.'cpanel_username'] = $sUsername;
+		$_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'] = $_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'];
+		$_POST[self::$OPTION_PREFIX.'cpanel_username'] = array( self::EncryptString( $sUsername, $_COOKIE[ self::SecurityAccessKeyCookieName ] ) );
+		$_POST[self::$OPTION_PREFIX.'cpanel_password'] = array( self::EncryptString( $_POST[self::$OPTION_PREFIX.'cpanel_password'],  $_COOKIE[ self::SecurityAccessKeyCookieName ] ) );
 
 		$this->updatePluginOptionsFromSubmit( $_POST[self::$OPTION_PREFIX.'all_options_input'] );
 	}//handleSubmit_main
@@ -218,7 +312,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 						self::getOption('cpanel_username'),
 						self::getOption('cpanel_password'),
 				);
-				
+
 				include_once( $sActionInclude );
 				
 			 	$sClassName = 'CPM_ActionDelegate_'.ucfirst( $sActionGroup );
@@ -236,6 +330,37 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		
 	}//handleSubmit_tasks
 	
+	public function onDisplayCpmSecurity() {
+		
+		//populates plugin options with existing configuration
+		$this->readyAllPluginOptions();
+		
+		$this->m_aPluginOptions_CpmEncryptSection['section_options'][0][1] = '';
+		
+		$sCurrentAccessKey = $this->getOption('cpanel_security_access_key');
+		
+		if ( !empty($sCurrentAccessKey) ) {
+			$this->m_aPluginOptions_CpmEncryptSection['section_options'][0][6] = "You must re-enter your Security Access Key before you can use the plugin.";
+		}
+		//Specify what set of options are available for this page
+		$aAvailableOptions = array(	&$this->m_aPluginOptions_CpmEncryptSection );
+		
+		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_CpmEncryptSection );
+		
+		$aData = array(
+			'plugin_url'		=> self::$PLUGIN_URL,
+			'var_prefix'		=> self::$OPTION_PREFIX,
+			'sak_cookie_name'	=> self::SecurityAccessKeyCookieName,
+			'aAllOptions'		=> $aAvailableOptions,
+			'all_options_input'	=> $sAllInputOptions,
+			'nonce_field'		=> $this->getSubmenuId('security'),
+			'form_action'		=> 'admin.php?page='.$this->getFullParentMenuId().'-security'
+		);
+		
+		$this->display( 'worpit_cpm_security', $aData );
+		
+	}//onDisplayCpmSecurity
+	
 	/**
 	 * For each display, if you're creating a form, define the form action page and the form_submit_id
 	 * that you can then use as a guard to handling the form submit.
@@ -245,8 +370,17 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		//populates plugin options with existing configuration
 		$this->readyAllPluginOptions();
 		
+		//Decrypt values for display on front end.
+		$sUsernameArray = self::getOption( 'cpanel_username' );
+		$sPasswordArray = self::getOption( 'cpanel_password' );
+		$this->m_aPluginOptions_CpmCredentialsSection['section_options'][2][1] = self::DecryptString( $sUsernameArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] );
+		$this->m_aPluginOptions_CpmCredentialsSection['section_options'][3][1] = self::DecryptString( $sPasswordArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] );
+		
 		//Specify what set of options are available for this page
-		$aAvailableOptions = array( &$this->m_aPluginOptions_EnableSection, &$this->m_aPluginOptions_CpmCredentialsSection) ;
+		$aAvailableOptions = array(
+				&$this->m_aPluginOptions_EnableSection,
+				&$this->m_aPluginOptions_CpmCredentialsSection,
+		);
 		
 		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_EnableSection );
 		$sAllInputOptions .= ','.$this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_CpmCredentialsSection );
@@ -254,9 +388,11 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		$aData = array(
 			'plugin_url'		=> self::$PLUGIN_URL,
 			'var_prefix'		=> self::$OPTION_PREFIX,
+			'sak_cookie_name'	=> self::SecurityAccessKeyCookieName,
 			'aAllOptions'		=> $aAvailableOptions,
 			'all_options_input'	=> $sAllInputOptions,
 			'nonce_field'		=> $this->getSubmenuId('main'),
+			'page_link_security'	=> $this->getSubmenuId('security'),
 			'form_action'		=> 'admin.php?page='.$this->getFullParentMenuId().'-main'
 		);
 		
@@ -278,16 +414,21 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_EnableSection );
 		$sAllInputOptions .= ','.$this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_CpmCredentialsSection );
 		
+		$sUsernameArray = self::getOption( 'cpanel_username' );
+		$sPasswordArray = self::getOption( 'cpanel_password' );
+		
 		$aData = array(
 			'plugin_url'		=> self::$PLUGIN_URL,
 			'var_prefix'		=> self::$OPTION_PREFIX,
+			'sak_cookie_name'	=> self::SecurityAccessKeyCookieName,
 			'cpanel_enabled'	=> self::getOption('enable_cpanel_manager_wordpress'),
 			'cpanel_server_address'		=> self::getOption('cpanel_server_address'),
 			'cpanel_server_port'		=> self::getOption('cpanel_server_port'),
-			'cpanel_username'	=> self::getOption('cpanel_username'),
-			'cpanel_password'	=> self::getOption('cpanel_password'),
+			'cpanel_username'	=> self::DecryptString( $sUsernameArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] ),
+			'cpanel_password'	=> self::DecryptString( $sPasswordArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] ),
 			'aAllOptions'		=> $aAvailableOptions,
-			'page_link_options'	=> $this->getSubmenuId('main'),
+			'page_link_options'		=> $this->getSubmenuId('main'),
+			'page_link_security'	=> $this->getSubmenuId('security'),
 			'nonce_field'		=> $this->getSubmenuId('tasks'),
 			'form_action'		=> 'admin.php?page='.$this->getFullParentMenuId().'-tasks'
 		);
@@ -312,6 +453,19 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		
 		$this->m_aShortcodes = array();
 	}//defineShortcodes
+	
+	private function adminNoticeMcryptLibUnavailable() {
+		
+		if ( $this->isWorpitPluginAdminPage() && !extension_loaded( 'mcrypt' ) ) {
+			$sNotice = "<p>Note: because you don't have the necessary encryption libraries loaded
+			on your web hosting, your cPanel login credential are <strong>NOT ENCRYPTED</strong>.</p>
+			<p>It is recommended that you don't use this plugin until those libraries ('mcrypt') are available.</p>
+			<p>Get <a href=\"http://bitly.com/M9SwTn\"><strong>better web hosting</strong></a> that has things like this as standard.</p>";
+			$sClass = 'error alert alert-error';
+			$this->getAdminNotice( $sNotice, $sClass, true );
+		}
+		
+	}
 
 	private function adminNoticeOptionsUpdated() {
 		
@@ -369,25 +523,42 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		
 	}//adminNoticeSubmitMessages
 	
+	public static function EncryptString( $insText, $insSalt ) {
 
-	/**
-	 * Meat and Potatoes of the CBC plugin
-	 * 
-	 * By default, $insContent will be "shown" for whatever countries are specified.
-	 * 
-	 * Alternatively, set to 'n' if you want to hide.
-	 * 
-	 * Logic is: if visitor is coming from a country in the 'country' list and show='y', then show the content.
-	 * OR
-	 * If the visitor is not from a country in the 'country' list and show='n', then show the content.
-	 * 
-	 * Otherwise display 'message' if defined.
-	 * 
-	 * 'message' is displayed where the the content isn't displayed.
-	 * 
-	 * @param $inaAtts
-	 * @param $insContent
-	 */
+		if ( !extension_loaded( 'mcrypt' ) )
+			return $insText;
+		
+		return trim(
+				base64_encode(
+						mcrypt_encrypt(
+								MCRYPT_RIJNDAEL_256,
+								$insSalt,
+								$insText,
+								MCRYPT_MODE_ECB,
+								mcrypt_create_iv(
+										mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), MCRYPT_RAND )
+								)
+						)
+				);
+	} 
+	
+	public static function DecryptString( $insText, $insSalt ) {
+
+		if ( !extension_loaded( 'mcrypt' ) )
+			return $insText;
+		
+		return trim(
+				mcrypt_decrypt(
+						MCRYPT_RIJNDAEL_256,
+						$insSalt,
+						base64_decode( $insText ),
+						MCRYPT_MODE_ECB,
+						mcrypt_create_iv(
+								mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), MCRYPT_RAND )
+						)
+				);
+	} 
+		
 	 
 	static public function IsValidDomainName( $insUrl ) {
 

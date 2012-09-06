@@ -10,6 +10,22 @@ include_once( dirname(__FILE__).DS.'widgets'.DS.'worpit_widgets.php' );
 		</div>
 		<div class="row">
 			<div class="span9">
+			
+			<?php
+			
+			if ( !isset( $_COOKIE[ $worpit_sak_cookie_name] ) ) { //the user hasn't created an encryption salt
+				
+				echo '<div class="alert alert-info">
+				<p>Before you can use this plugin, you need to provide your Security Access Key. This will be used to encrypt
+				your cPanel username and cPanel password information that is stored in your WordPress database.</p>
+				<p>The reason we enforce this, is obvious - security. If your WordPress site is ever compromised, then your cPanel
+				login details will be safe.</p>
+				<p><strong><a href="admin.php?page='.$worpit_page_link_security.'">Enter your Security Access Key here</a></strong>.</p>
+				</div>';
+				
+			}
+			else {
+			?>
 				<form method="post" action="<?php echo $worpit_form_action; ?>" class="form-horizontal">
 					<?php
 						wp_nonce_field( $worpit_nonce_field );
@@ -21,6 +37,12 @@ include_once( dirname(__FILE__).DS.'widgets'.DS.'worpit_widgets.php' );
 						<button type="submit" class="btn btn-primary" name="submit">Save All Settings</button>
 					</div>
 				</form>
+			<?php
+			}
+			?>
+			
+			
+			
 			</div><!-- / span9 -->
 			<div class="span3" id="side_widgets">
 	  			<?php echo getWidgetIframeHtml( 'cpm-side-widgets' ); ?>

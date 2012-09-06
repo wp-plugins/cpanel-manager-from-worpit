@@ -30,7 +30,21 @@ ini_set( 'display_errors', 1 );
 			<div class="span9">
 			<?php
 				if ( $fEnabled ) {
-					include_once( dirname(__FILE__).'/worpit_cpm_tasks_cpanel.php' );
+					
+					if ( !isset( $_COOKIE[ $worpit_sak_cookie_name ] ) ) { //the user hasn't created an encryption salt
+					?>
+						<div class="alert alert-info">
+						<p>Before you can use this plugin, you need to provide your Security Access Key. This will be used to encrypt
+						your cPanel username and cPanel password information that is stored in your WordPress database.</p>
+						<p>The reason we enforce this, is obvious - security. If your WordPress site is ever compromised, then your cPanel
+						login details will be safe.</p>
+						<p><strong><a href="admin.php?page=<?php echo $worpit_page_link_security ?>">Enter your Security Access Key here</a></strong>.</p>
+						</div>
+					<?php
+					}
+					else {
+						include_once( dirname(__FILE__).'/worpit_cpm_tasks_cpanel.php' );
+					}
 				}
 				else {
 					echo '<p>Nothing to see here unless you enable the feature.</p>';
