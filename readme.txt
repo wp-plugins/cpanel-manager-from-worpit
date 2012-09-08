@@ -32,6 +32,10 @@ and also your crons.
 
 == Frequently Asked Questions ==
 
+= Where can I find my Security Access Key? =
+
+This is a secret key/password that YOU CREATE that protects and restricts access to your cPanel username/password.
+
 = Is it secure to have my cPanel login credentials in my WordPress? =
 
 Normally, no. But with version 1.1 of the plugin, if you have the 'mcrypt' PHP library available on your web hosting
