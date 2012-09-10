@@ -98,6 +98,43 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 	ob_end_clean();
 	
 	/*
+	 * Create HTML for Tab: FtpNewUserBulk
+	 */
+	ob_start();
+	
+	?>
+		<legend>Create New FTP Users (Bulk)</legend>
+		<form class="form-horizontal" action="<?php echo $sFormAction; ?>" method="post" >
+			<?php wp_nonce_field( $sNonce ); ?>
+			<div class="control-group">
+				<label class="control-label" for="ftp_new_user_bulk">New FTP User Details</label>
+				<div class="controls">
+					<textarea type="textarea" rows="10" cols="100" name="ftp_new_user_bulk" id="ftp_new_user_bulk" placeholder="Username, Password, Quota - Take a new line per new user" class="span5"
+					/><?php echo isset($_POST['ftp_new_user_bulk'])? $_POST['ftp_new_user_bulk'] : '' ?></textarea>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="ftp_new_user_bulk_homedir">FTP User Base Homedir</label>
+				<div class="controls">
+					<div class="input-prepend">
+						<span class="add-on"><?php echo $sHomeDir.'/'; ?></span><input type="text" name="ftp_new_user_bulk_homedir" id="ftp_new_user_bulk_homedir" placeholder="User Base Directory"
+					value="<?php echo isset($_POST['ftp_new_user_bulk_homedir'])? $_POST['ftp_new_user_bulk_homedir'] : '' ?>" class="span2" />
+					</div>
+				</div>
+			</div>
+			<?php echo getConfirmBoxHtml(); ?>
+			<div class="form-actions">
+				<input type="hidden" name="cpm_submit_action" value="ftp_create_ftpusersbulk" />
+				<input type="hidden" name="cpm_form_submit" value="1" />
+			 	<button type="submit" class="btn btn-primary" onClick="return confirmSubmit('Are you sure you want to create the new FTP Users?')">Create New FTP Users</button>
+			</div>
+		</form>
+		
+	<?php
+	$aHtml[ 'FtpNewUsersBulk' ] = ob_get_contents();
+	ob_end_clean();
+	
+	/*
 	 * Create HTML for Tab: DatabasesDeleteUser
 	 */
 	ob_start();
@@ -167,11 +204,13 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 				<ul class="nav nav-pills">
 					<li class="active"><a href="#FtpInfo" data-toggle="tab">Info</a></li>
 					<li><a href="#FtpNewUser" data-toggle="tab">New FTP User</a></li>
+					<li><a href="#FtpNewUserBulk" data-toggle="tab">New FTP Users (Bulk)</a></li>
 					<li><a href="#FtpDeleteUser" data-toggle="tab">Delete FTP Users</a></li>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="FtpInfo"><?php echo $aHtml[ 'FtpInfo' ]; ?></div>
 					<div class="tab-pane" id="FtpNewUser"><?php echo $aHtml[ 'FtpNewUser' ]; ?></div>
+					<div class="tab-pane" id="FtpNewUserBulk"><?php echo $aHtml[ 'FtpNewUsersBulk' ]; ?></div>
 					<div class="tab-pane" id="FtpDeleteUser"><?php echo $aHtml[ 'FtpDeleteUser' ]; ?></div>
 				</div>
 			</div>

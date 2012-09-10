@@ -4,7 +4,7 @@ Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
 Tested up to: 3.4
-Stable tag: 1.2
+Stable tag: 1.3
 
 == Description ==
 
@@ -25,8 +25,9 @@ Currently you can:
 = FTP =
 
 *	View a list of all FTP users.
-*	Add a new FTP users
-*	Delete multiple FTP users
+*	Add a new FTP user
+*	Add new FTP users in bulk.
+*	Delete FTP users in bulk (with option to remove ftp directories)
 
 With it (in time) you will be able to perform many convenient functions from within your WordPress site that
 you would otherwise need to log into your cPanel to do.
@@ -104,6 +105,10 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * add ability to perform FULL cPanel backup and FTP offsite
 * add ability to perform cPanel backup of MySQL databases and FTP offsite
 
+= 1.3 =
+
+* ADDED: Ability to add new FTP users in Bulk using comma-separate list of 'username, password, disk-quota'
+
 = 1.2 =
 
 * ADDED: Ability to add new FTP Users
@@ -122,6 +127,10 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * First Release.
 
 == Upgrade Notice ==
+
+= 1.3 =
+
+* ADDED: Ability to add new FTP users in Bulk using comma-separate list of 'username, password, disk-quota'
 
 = 1.2 =
 

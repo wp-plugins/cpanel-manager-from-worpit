@@ -39,7 +39,9 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	 */
 	public function createdb_adduser() {
 		
-		if ( !$this->preActionBasicValidate( 'create a new database and add new user' ) ) {
+		$aVars = array( 'database_name', 'database_user', 'database_user_password' );
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new database and add new user' ) ) {
 			return false;
 		}
 		
@@ -49,7 +51,7 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 		$this->m_fGoodToGo = self::ValidateUserPassword( $this->m_aData['database_user_password'], $this->m_aMessages ) && $fValidState;
 		
 		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix."Your inputs had problems. Please Check.";
+			$this->m_aMessages[] = "Your inputs had problems. Please Check.";
 			return false;
 		}
 		
@@ -82,7 +84,9 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	 */
 	public function create_mysqluser() {
 		
-		if ( !$this->preActionBasicValidate( 'create new MySQL user' ) ) {
+		$aVars = array( 'database_new_user', 'database_new_user_password' );
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create new MySQL user' ) ) {
 			return false;
 		}
 
@@ -91,7 +95,7 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 		$this->m_fGoodToGo = self::ValidateUserPassword( $this->m_aData['database_new_user_password'], $this->m_aMessages ) && $fValidState;
 		
 		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix."Your inputs had problems. Please Check.";
+			$this->m_aMessages[] = "Your inputs had problems. Please Check.";
 			return false;
 		}
 		
@@ -121,12 +125,14 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	 */
 	public function delete_mysqldbs() {
 		
-		if ( !$this->preActionBasicValidate( 'delete MySQL databases' ) ) {
+		$aVars = array();
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'delete MySQL databases' ) ) {
 			return false;
 		}
 		
 		if ( !isset( $this->m_aData['databases_to_delete_names'] ) || !is_array( $this->m_aData['databases_to_delete_names'] ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."No MySQL databases were selected.";
+			$this->m_aMessages[] = "No MySQL databases were selected.";
 			return false;
 		}
 		
@@ -164,12 +170,14 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	 */
 	public function delete_mysqlusers() {
 		
-		if ( !$this->preActionBasicValidate( 'delete MySQL users' ) ) {
+		$aVars = array();
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'delete MySQL users' ) ) {
 			return false;
 		}
 		
 		if ( !isset( $this->m_aData['users_to_delete_names'] ) || !is_array( $this->m_aData['users_to_delete_names'] ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."No MySQL users were selected.";
+			$this->m_aMessages[] = "No MySQL users were selected.";
 			return false;
 		}
 		
@@ -208,7 +216,9 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	 */
 	protected function createNewMySqlDb( $sDbName ) {
 		
-		if ( !$this->preActionBasicValidate( 'create a new MySQL database' ) ) {
+		$aVars = array();
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new MySQL database' ) ) {
 			return false;
 		}
 		
@@ -229,8 +239,10 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	}
 	
 	public function createNewMySqlUser( $sUsername, $sPassword ) {
+
+		$aVars = array();
 		
-		if ( !$this->preActionBasicValidate( 'create a new MySQL User' ) ) {
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new MySQL User' ) ) {
 			return false;
 		}
 		
@@ -252,7 +264,9 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	
 	public function addMySqlUserToDb( $sDbName, $sUsername ) {
 		
-		if ( !$this->preActionBasicValidate( 'add new MySQL User to the DB' ) ) {
+		$aVars = array();
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'add new MySQL User to the DB' ) ) {
 			return false;
 		}
 		

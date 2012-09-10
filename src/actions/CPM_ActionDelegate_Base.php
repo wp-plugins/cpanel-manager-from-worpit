@@ -97,9 +97,23 @@ class CPM_ActionDelegate_Base {
 		if ( !is_null( $inaData ) ) {
 			$this->m_aData = $inaData;
 		}
+		
+		foreach( $this->m_aData as &$data ) {
+			if ( is_string($data) ) {
+				$data = trim($data);
+			}
+		}
 	}
 
-	protected function preActionBasicValidate( $insAction = 'perform this action' ) {
+	protected function preActionBasicValidate( $inaVars = array(), $insAction = 'perform this action' ) {
+		
+		if ( !empty($inaVars) ) {
+			foreach ( $inaVars as $sVar ) {
+				if ( is_string($this->m_aData[$sVar]) ) {
+					$this->m_aData[$sVar] = trim( $this->m_aData[$sVar] );
+				}
+			}
+		}
 	
 		$sErrorPrefix = 'No attempt was made to <u>'.$insAction.'</u> because: ';
 		
@@ -118,7 +132,6 @@ class CPM_ActionDelegate_Base {
 	
 		return true;
 	}//preActionBasicValidate
-	
 	
 	public static function ValidateDatabaseName( $insDatabaseName, &$aMessages ) {
 		
@@ -174,7 +187,7 @@ class CPM_ActionDelegate_Base {
 			$insDatabaseUserPassword = trim($insDatabaseUserPassword);
 			
 			if ( strlen($insDatabaseUserPassword ) < 6 ) {
-				$aMessages[] = "The user password provided is too short ( 6 characters or more ).";
+				$aMessages[] = "The user password provided ($insDatabaseUserPassword) is too short (6 characters or more).";
 				$fValidState = false;
 			}
 		}
@@ -193,11 +206,11 @@ class CPM_ActionDelegate_Base {
 			$insFtpUser = trim($insFtpUser);
 	
 			if ( !self::IsAlphaNumeric($insFtpUser) ) {
-				$aMessages[] = "The FTP user provided is not numbers/letters only (abc123...).";
+				$aMessages[] = "The FTP user provided ($insFtpUser) is not numbers/letters only (abc123...).";
 				$fValidState = false;
 			}
 			if ( strlen($insFtpUser ) > 25 ) {
-				$aMessages[] = "The FTP user provided is too long ( 25 characters or less ).";
+				$aMessages[] = "The FTP user provided ($insFtpUser) is too long (25 characters or less).";
 				$fValidState = false;
 			}
 		}
@@ -216,7 +229,7 @@ class CPM_ActionDelegate_Base {
 			$insQuota = trim($insQuota);
 	
 			if ( !self::IsNumeric($insQuota) ) {
-				$aMessages[] = "The FTP quota provided is not a number.";
+				$aMessages[] = "The FTP quota provided ($insQuota) is not a number.";
 				$fValidState = false;
 			}
 		}

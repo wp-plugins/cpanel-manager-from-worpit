@@ -34,7 +34,9 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 	 */
 	public function create_ftpuser() {
 		
-		if ( !$this->preActionBasicValidate( 'create a new FTP user' ) ) {
+		$aVars = array( 'ftp_new_user', 'ftp_new_user_password', 'ftp_new_user_quota', 'ftp_new_user_homedir' );
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new FTP user' ) ) {
 			return false;
 		}
 		
@@ -61,7 +63,82 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 		
 	}//create_ftpuser
 
+	public function createNewFtpUser( $insUsername, $insPassword, $insQuota, $insHomedir ) {
+		
+		$aVars = array();
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new FTP User' ) ) {
+			return false;
+		}
+		
+		$aArgs = array(
+					'user'		=> $insUsername,
+					'pass'		=> $insPassword,
+					'quota'		=> intval($insQuota),
+					'homedir'	=> $insHomedir
+				);
+		
+		$this->m_oCpanel_Api->doApiFunction( "Ftp", "addftp", $aArgs );
+		$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+		
+		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+			$fSuccess = true;
+			$this->m_aMessages[] = "Creating new FTP User on cPanel account succeeded: ".$insUsername.'|'.$insPassword.'|'.$insQuota.'|'.$insHomedir; 
+		}
+		else {
+			$fSuccess = false;
+			$this->m_aMessages[] = "Creating new FTP User ( $insUsername | $insPassword | $insQuota | $insHomedir ) on cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse ); 
+		}
+		
+		return $fSuccess;
+		
+	}//createNewFtpUser
 	
+	public function create_ftpusersbulk() {
+		
+		$aVars = array( 'ftp_new_user_bulk' );
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create new FTP users' ) ) {
+			return false;
+		}
+		
+		if ( !isset($this->m_aData['ftp_new_user_bulk']) || empty($this->m_aData['ftp_new_user_bulk']) ) {
+			$this->m_aMessages[] = "No new FTP User details were provided.";
+			return false;
+		}
+		
+		$fValidState = true;
+		$aAllNewUsers = array();
+		$fValidState = self::ValidateFtpUsersBulk( $this->m_aData['ftp_new_user_bulk'], $aAllNewUsers, $this->m_aMessages ) && $fValidState;
+
+		if ( $fValidState && !empty($aAllNewUsers) ) {
+			
+			$sBaseHomedir = trim( $this->m_aData['ftp_new_user_bulk_homedir'], '/' );
+			if ( !empty($sBaseHomedir) ) {
+				$sBaseHomedir .= '/';
+			}
+			
+			foreach ( $aAllNewUsers as $sNewFtpUser ) {
+				
+				$aNewFtpUserDetails = explode( ',', $sNewFtpUser );
+				list( $sUsername, $sPassword, $sQuota ) = $aNewFtpUserDetails;
+				
+				$this->m_aData['ftp_new_user'] = $sUsername;
+				$this->m_aData['ftp_new_user_password'] = $sPassword;
+				$this->m_aData['ftp_new_user_quota'] = $sQuota;
+				$this->m_aData['ftp_new_user_homedir'] = $sBaseHomedir . $sUsername;
+				
+				$fValidState = $this->create_ftpuser();
+				
+				if (!$fValidState) {
+					break;
+				}
+			}
+		}
+		
+		
+		return $fValidState;
+	}
 	/**
 	 * Will delete all databases from the cPanel account with names that correspond to elements
 	 * in the array that is populated in position 'databases_to_delete_names' in the main data array. 
@@ -69,12 +146,14 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 	 */
 	public function delete_ftpusers() {
 		
-		if ( !$this->preActionBasicValidate( 'to delete FTP users' ) ) {
+		$aVars = array();
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'to delete FTP users' ) ) {
 			return false;
 		}
 		
 		if ( !isset( $this->m_aData['users_to_delete_names'] ) || !is_array( $this->m_aData['users_to_delete_names'] ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."No FTP users were selected.";
+			$this->m_aMessages[] = "No FTP users were selected.";
 			return false;
 		}
 		
@@ -108,5 +187,49 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 		
 		return $fSuccess;
 	}
+	
+	public static function ValidateFtpUsersBulk( $insFtpUserDataBulk, &$inaAllNewUsers, &$inaMessages ) {
+		
+		$fValidState = true;
+		if ( !empty( $insFtpUserDataBulk ) ) {
+			
+			$inaAllNewUsers = explode( "\n", $insFtpUserDataBulk );
+
+			$iCount = -1;
+			foreach( $inaAllNewUsers as $sNewUserLine ) {
+				
+				$iCount++;
+				
+				//Remove Empty lines from array to process
+				$sNewUserLine = self::CleanupFtpUserBulkString( $sNewUserLine );
+				if ( empty($sNewUserLine) ) {
+					unset( $inaAllNewUsers[$iCount] );
+					continue;
+				}
+				
+				$iCommaCount = substr_count( $sNewUserLine, ',' );
+
+				if ( $iCommaCount != 2 ) {
+					$inaMessages[] = "One of the new user entries doesn't have the correct number of values. Check that you have 3 values separated by (2) commas.";
+					$fValidState = false;
+					break;
+				}
+				
+			}
+		}
+		else {
+			$inaMessages[] = "The new FTP User data is blank.";
+			$fValidState = false;
+		}
+		
+		return $fValidState;
+	}
+	
+	protected static function CleanupFtpUserBulkString( $insUserString ) {
+		
+		$insUserString = preg_replace( '/\s+/', '', $insUserString);
+		return $insUserString;
+	}
+	
 	
 }//CPM_ActionDelegate_Ftp
