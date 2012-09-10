@@ -91,43 +91,32 @@ class Worpit_CPanelTransformer {
 			return $aDbNamesList;
 		}
 	
-		$aDbData = self::GetDataFromResponse( $inaApiResponse, 'data' );
+		$aDbData = self::GetDataArray( $inaApiResponse, 'db' );
 		
-		if ( !empty($aDbData) ) {
-			if ( array_key_exists('db', $aDbData) ) { //there's only 1 Database in this data set
-				$aDbNamesList[] = $aDbData['db'];
-			}
-			else {
-				foreach( $aDbData as $aDb ) {
-					$aDbNamesList[] = $aDb['db'];
-				}
-			}
+		foreach( $aDbData as $aDb ) {
+			$aDbNamesList[] = $aDb['db'];
 		}
 
 		return $aDbNamesList;
 	}
 	
+	/**
+	 * Assumes last API call was: 'MysqlFE', 'listusers'
+	 * 
+	 * @param $inaApiResponse
+	 */
 	public static function GetList_AllMySqlUsers( $inaApiResponse ) {
-		
+
 		$aUsersList = array();
 		
-		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
+		if ( is_null($inaApiResponse) || !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
 			return $aUsersList;
 		}
 	
-		$aDbUserData = self::GetDataFromResponse( $inaApiResponse, 'data' );
+		$aDbUserData = self::GetDataArray( $inaApiResponse, 'user' );
 		
-		if ( !empty($aDbUserData) ) {
-			
-			if ( array_key_exists('dblist', $aDbUserData) ) { //there's only 1 DB User in this data set
-				$aUsersList[] = $aDbUserData['user'];
-			}
-			else {
-				foreach( $aDbUserData as $aDbUser ) {
-					$aUsersList[] = $aDbUser['user'];
-				}
-			}
-			
+		foreach( $aDbUserData as $aDbUser ) {
+			$aUsersList[] = $aDbUser['user'];
 		}
 		
 		return $aUsersList;
@@ -192,7 +181,7 @@ class Worpit_CPanelTransformer {
 			return $aDb;
 		}
 		
-		$aAllDbData = self::GetData_MySqlDbs( $inaApiResponse, 'data' );
+		$aAllDbData = self::GetDataArray( $inaApiResponse, 'db' );
 
 		if ( !empty($aAllDbData) ) {
 			
@@ -205,36 +194,105 @@ class Worpit_CPanelTransformer {
 		}
 		
 		return $aDb;
+		
 	}//GetData_MySqlDb
 	
+	/**
+	 * 
+	 * @param $inaApiResponse
+	 */
+	public static function GetData_MainFtpUser( $inaApiResponse ) {
+		
+		$aAllFtpUsers = self::GetDataArray( $inaApiResponse, 'user' );
+		$aMainFtpUser = array();
+		
+		if ( empty($aAllFtpUsers) ) { //Last API call failed.
+			return $aMainFtpUser;
+		}
+		
+		foreach ( $aAllFtpUsers as $aFtpUser  ) {
+			
+			if ( isset($aFtpUser['type']) && $aFtpUser['type'] == 'main' ) {
+				$aMainFtpUser = $aFtpUser;
+			}
+			
+		}
+		
+		return $aMainFtpUser;
+		
+	}//GetData_MainFtpUser
 	
 	/**
-	 * Returns an array of arrays of all DBs data
+	 * 
+	 * @param $inaApiResponse
+	 */
+	public static function GetList_AllFtpUsers( $inaApiResponse ) {
+		
+		$aAllFtpUsersData = self::GetDataArray( $inaApiResponse, 'user' );
+		$aMainFtpUserList = array();
+		
+		if ( !empty($aAllFtpUsersData) ) { //Last API call passed.
+			
+			foreach ( $aAllFtpUsersData as $aFtpUser  ) {
+				if ( isset($aFtpUser['user']) ) {
+					$aMainFtpUserList[] = $aFtpUser['user'];
+				}
+			}
+		}
+		
+		return $aMainFtpUserList;
+		
+	}//GetList_AllFtpUsers
+	
+	/**
+	 * 
+	 * @param $inaApiResponse
+	 */
+	public static function GetData_MainDomain( $inaApiResponse ) {
+		
+		$aAllDomains = self::GetDataArray( $inaApiResponse, 'domain' );
+		$sMainDomain = '';
+		
+		if ( !empty($aAllDomains) ) { 
+			$sMainDomain = $aAllDomains[0]['domain'];
+		}
+		
+		return $sMainDomain;
+		
+	}//GetData_MainDomain
+	
+	/**
+	 * Returns an array of arrays of all 'data'
+	 * 
+	 * You need to supply the TEST KEY in order to determine whether it's 1D array or an array of arrays
+	 * 
+	 * Databases: 'db'
+	 * FTP Users: 'user'
 	 * 
 	 * @param unknown_type $inaApiResponse
 	 */
-	public static function GetData_MySqlDbs( $inaApiResponse ) {
+	public static function GetDataArray( $inaApiResponse, $sTestKey ) {
 		
-		$aDatabases = array();
+		$aData = array();
 		
 		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
 			return $aDatabases;
 		}
 		
-		$aDbData = self::GetDataFromResponse( $inaApiResponse, 'data' );
+		$aResponseData = self::GetDataFromResponse( $inaApiResponse, 'data' );
 		
-		if ( !empty($aDbData) ) {
+		if ( !empty($aResponseData) ) {
 			
-			if ( array_key_exists('db', $aDbData) ) { //there's only 1 Database in this data set
-				$aDatabases[] = $aDbData;
+			if ( array_key_exists( $sTestKey, $aResponseData ) ) { //there's only 1 Database in this data set
+				$aData[] = $aResponseData;
 			}
 			else {
-				$aDatabases = $aDbData;
+				$aData = $aResponseData;
 			}
 			
 		}
 		
-		return $aDatabases;
+		return $aData;
 	}
 	
 	

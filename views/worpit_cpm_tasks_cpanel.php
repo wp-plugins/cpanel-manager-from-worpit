@@ -1,6 +1,7 @@
 <?php
 
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
+include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_ftp.php' );
 
 	$aConnectionData = array(
 			$worpit_cpanel_server_address,
@@ -28,10 +29,22 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
 			ul#TabsTopLevelMenu > li {
 				margin-bottom: 15px;
 			}
-			#TabsTopLevelContent .well {
+			#TabsTopLevelContent > div > .well {
 				margin: 44px 20px;
 			}
 			
+			
+			.tabs-function ul.nav-pills {
+				margin-bottom: 4px;
+				padding-left: 20px;
+			}
+			.tabs-function .tab-content {
+				margin: 0 0 0 10px;
+				padding: 10px 5px;
+			}
+			.tabs-function .well {
+				margin: 0px;
+			}
 			
 			/* MYSQL: #08883B; */
 			li#MySqlNav a {
@@ -40,10 +53,6 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
 			li#MySqlNav.active a {
 				color: #555;
 			}
-			#TabsFunctionMySql ul.nav-pills {
-				margin-bottom: 4px;
-				padding-left: 20px;
-			}
 			#TabsFunctionMySql ul.nav-pills a {
 				color: #08883B;
 			}
@@ -51,30 +60,62 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
 				background-color: #08883B;
 				color: #fffffe;
 			}
-			#TabsFunctionMySql .tab-content {
-				margin: 0 20px;
-				padding: 10px;
+			
+			/* FTP: #400888; */
+			li#FtpUsersNav a {
+				color: #400888;
 			}
-			#TabsFunctionMySql .well {
-				margin: 0px;
+			li#FtpUsersNav.active a {
+				color: #555;
+			}
+			#TabsFunctionFtp ul.nav-pills a {
+				color: #400888;
+			}
+			#TabsFunctionFtp ul.nav-pills li.active a {
+				background-color: #400888;
+				color: #fffffe;
+			}
+			
+			.user_homedir {
+				font-family: "Courier New";
 			}
 		</style>
 		<div id="TabsTopLevelFunction" class="tabbable tabs-left">
 			<ul id="TabsTopLevelMenu" class="nav nav-tabs">
 				<li id="MySqlNav" class="active"><a href="#MySqlTab" data-toggle="tab">MySQL</a></li>
+				<li id="FtpUsersNav"><a href="#FtpUsersTab" data-toggle="tab">FTP Users</a></li>
 				<li id="ParkedDomainsNav"><a href="#ParkedDomainsTab" data-toggle="tab">Parked Domains</a></li>
 				<li id="AddonDomainsNav"><a href="#AddonDomainsTab" data-toggle="tab">Addon Domains</a></li>
-				<li id="FtpUsersNav"><a href="#FtpUsersTab" data-toggle="tab">FTP Users</a></li>
 				<li id="CronListNav"><a href="#CronListTab" data-toggle="tab">Cron Job List</a></li>
 			</ul>
 			<div id="TabsTopLevelContent" class="tab-content">
 				<div class="tab-pane active" id="MySqlTab"><?php echo getContent_MySqlTab( $aConnectionData, $oCpanelApi ); ?></div>
-				<div class="tab-pane fade in" id="ParkedDomainsTab"><?php echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Park', 'listparkeddomains', 'domain', 'Parked Domains' ); ?></div>
-				<div class="tab-pane fade in" id="AddonDomainsTab"><?php echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Park', 'listaddondomains', 'domain', 'Addon Domains' ); ?></div>
-				<div class="tab-pane fade in" id="FtpUsersTab"><?php echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Ftp', 'listftp', 'user', 'FTP Users' ); ?></div>
-				<div class="tab-pane fade in" id="CronListTab"><?php echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Cron', 'listcron', 'command_htmlsafe', 'Cron Jobs' ); ?></div>
+				<div class="tab-pane fade in" id="FtpUsersTab"><?php echo getContent_FtpTab( $aConnectionData, $oCpanelApi ); ?></div>
+				<div class="tab-pane fade in" id="ParkedDomainsTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Park', 'listparkeddomains', 'domain', 'Parked Domains' ); ?></div>
+				<div class="tab-pane fade in" id="AddonDomainsTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Park', 'listaddondomains', 'domain', 'Addon Domains' ); ?></div>
+				<div class="tab-pane fade in" id="CronListTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Cron', 'listcron', 'command_htmlsafe', 'Cron Jobs' ); ?></div>
 			</div>
 		</div>
+		<script LANGUAGE="JavaScript">
+			function confirmSubmit( sMessage ) {
+				var agree=confirm( sMessage );
+				if (agree)
+					return true ;
+				else
+					return false ;
+			}
+		</script>
+		<script type='text/javascript'>
+			jQuery( document ).ready(
+				function () {
+					jQuery( '*[rel=popover]')
+						.popover();
+					
+					jQuery( '*[data-popover=popover]')
+						.popover();
+				}
+			);
+		</script>
 		<?php
 	}
 	
@@ -165,5 +206,16 @@ function getArrayAsList( $inaData ){
 	return $sHtml;
 }
 	
-?>
+function getConfirmBoxHtml() {
+
+	return '
+			<div class="control-group">
+				<label class="control-label" for="confirm_action">Type \'CONFIRM\' :</label>
+				<div class="controls">
+					<input type="text" id="confirm_action"" name="confirm_action" placeholder="Please confirm your intent" value="" />
+				</div>
+			</div>
+	';
+}
+
 		

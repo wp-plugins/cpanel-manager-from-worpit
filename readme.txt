@@ -4,7 +4,7 @@ Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
 Tested up to: 3.4
-Stable tag: 1.1
+Stable tag: 1.2
 
 == Description ==
 
@@ -13,16 +13,20 @@ offers you the ability to connect to your Web Hosting cPanel account.
 
 Currently you can:
 
+= MySQL =
+
 *	View a list of all MySQL database and their attached users.
 *	Download any MySQL database in your cPanel account directly from this plugin.
 *	Add a new MySQL database and a new MySQL user to that database.
 *	Add a new MySQL user.
 *	Delete MySQL databases from your cPanel account IN BULK - take GREAT CARE.
 *	Delete MySQL users from your cPanel account IN BULK - take GREAT CARE.
+
+= FTP =
+
 *	View a list of all FTP users.
-*	View a list of all Parked Domains.
-*	View a list of all Addon Domains.
-*	View a list of all Cron Jobs.
+*	Add a new FTP users
+*	Delete multiple FTP users
 
 With it (in time) you will be able to perform many convenient functions from within your WordPress site that
 you would otherwise need to log into your cPanel to do.
@@ -34,7 +38,7 @@ and also your crons.
 
 = Where can I find my Security Access Key? =
 
-This is a secret key/password that YOU CREATE that protects and restricts access to your cPanel username/password.
+This is a secret key/password that YOU CREATE. It protects and restricts access to your cPanel username/password.
 
 = Is it secure to have my cPanel login credentials in my WordPress? =
 
@@ -90,6 +94,23 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 
 == Changelog ==
 
+= TODO =
+
+* Remove some hardcoding for Jump-links and from the cPanel API itself (server port)
+* Add domain name functions - addon/parked domains.
+* Allow Adding FTP users in bulk.
+* add cron job management
+* add file handling and file manager jump links
+* add ability to perform FULL cPanel backup and FTP offsite
+* add ability to perform cPanel backup of MySQL databases and FTP offsite
+
+= 1.2 =
+
+* ADDED: Ability to add new FTP Users
+* ADDED: Ability to delete multiple FTP users account.
+* ADDED: Jump link to phpMyAdmin for your hosting account.
+* REMOVED: Parked/Addon Domains and Crons tabs until their ready.
+
 = 1.1 =
 
 * ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
@@ -101,6 +122,10 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * First Release.
 
 == Upgrade Notice ==
+
+= 1.2 =
+
+* ADDED: FTP User functionality - adding and deleting
 
 = 1.1 =
 

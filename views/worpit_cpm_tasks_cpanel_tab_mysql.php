@@ -12,9 +12,11 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	$inoCpanelApi->doApiFunction( 'MysqlFE', 'listdbs' );
 	$oLastResponse = $inoCpanelApi->getLastResponse();
 
+	$sCpanelJumpUrlStem = "http://$sServerAddress:$sServerPort/login/?user=$sUsername&pass=$sPassword&goto_uri=";
+
 	if ( Worpit_CPanelTransformer::GetLastSuccess($oLastResponse) ) { //Last API call was a success.
 		
-		$aDbData = Worpit_CPanelTransformer::GetData_MySqlDbs( $oLastResponse, 'data' );
+		$aDbData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'db' );
 
 		if ( !empty($aDbData) ) {
 
@@ -28,7 +30,7 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 				$sDbUserCount = $aDb[ 'usercount' ];
 				$aDbUserList = Worpit_CPanelTransformer::GetList_MySqlUsersOnDb( $oLastResponse, $sDbName );
 
-				$sDownloadUrl = "http://$sServerAddress:$sServerPort/login/?user=$sUsername&pass=$sPassword&goto_uri=/getsqlbackup/$sDbName.sql.gz";
+				$sDownloadUrl = "$sCpanelJumpUrlStem/getsqlbackup/$sDbName.sql.gz";
 				$sHtml .= '<li><a href="'.$sDownloadUrl.'" target="_blank" title="Download Backup" onClick="return confirm(\'Do want to download this database?\')"><i class="icon icon-download"></i></a> '.$sDbName.' ('.$sDbSizeMb.'MB)';
 
 				if ( !empty($aDbUserList) ) {
@@ -47,13 +49,44 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 
 
 		} else {
-			$sHtml .= "There doesn't appear to be any.";
+			$sHtml .= "There doesn't appear to be any databases with connected users on this account.";
 		}
 	} else {
 		$sHtml .= 'Failed: Could not get the list.';
 	}
+	ob_start();
+	?>
+	<style>
+		#CpanelJumpLinksMySql {
+			margin-top: 20px;
+		}
+		.cpanel_icon {
+			border: 1px solid #bbb;
+			border-radius: 4px;
+			text-align: center;
+			vertical-align: middle;
+			height: 50px;
+		}
+		.cpanel_icon a {
+			background-repeat: no-repeat;
+			display: inline-block;
+			margin-top: 5px;
+		}
 	
-	$aHtml[ 'DatabasesInfo' ] = $sHtml;
+	</style>
+	<div id="CpanelJumpLinksMySql" class="row">
+		<div class="span1 offset1 cpanel_icon"><a class="spriteicon_img" id="icon-mysql" href="<?php echo $sCpanelJumpUrlStem; ?>" target="_blank"></a></div>
+		<div class="span1 cpanel_icon"><a class="spriteicon_img" id="icon-mysql-wizard3" href="<?php echo $sCpanelJumpUrlStem; ?>" target="_blank"></a></div>
+		<div class="span1 cpanel_icon"><a class="spriteicon_img" id="icon-phpMyAdmin" href="<?php echo $sCpanelJumpUrlStem; ?>/3rdparty/phpMyAdmin/index.php" target="_blank"></a></div>
+		<div class="span1 cpanel_icon"><a class="spriteicon_img" id="icon-mysql-remoteaccess" href="<?php echo $sCpanelJumpUrlStem; ?>" target="_blank"></a></div>
+	</div>
+	
+	<?php
+	$sHtml .= ob_get_contents();
+	ob_end_clean();
+	
+	
+	$aHtml[ 'FTPInfo' ] = $sHtml;
 	
 	/*
 	 * Create HTML for Tab: New Database
@@ -197,6 +230,7 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	
 	$inoCpanelApi->doApiFunction( 'MysqlFE', 'listusers' );
 	$oLastResponse = $inoCpanelApi->getLastResponse();
+	
 	?>
 		<legend>Delete MySQL Users</legend>
 		<form class="form-horizontal" action="<?php echo $sFormAction; ?>" method="post" >
@@ -238,7 +272,7 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	ob_end_clean();
 	
 	?>
-			<div id="TabsFunctionMySql" class="tabbable">
+			<div id="TabsFunctionMySql" class="tabbable tabs-function">
 				<ul class="nav nav-pills">
 					<li class="active"><a href="#DatabasesInfo" data-toggle="tab">Info</a></li>
 					<li><a href="#DatabasesNewDb" data-toggle="tab">New Database</a></li>
@@ -247,46 +281,15 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 					<li><a href="#DatabasesDeleteUser" data-toggle="tab">Delete MySQL User</a></li>
 				</ul>
 				<div class="tab-content">
-					<div class="tab-pane active" id="DatabasesInfo"><?php echo $aHtml[ 'DatabasesInfo' ]; ?></div>
+					<div class="tab-pane active" id="DatabasesInfo"><?php echo $aHtml[ 'FTPInfo' ]; ?></div>
 					<div class="tab-pane" id="DatabasesNewDb"><?php echo $aHtml[ 'DatabasesNewDb' ]; ?></div>
 					<div class="tab-pane" id="DatabasesNewUser"><?php echo $aHtml[ 'DatabasesNewUser' ]; ?></div>
 					<div class="tab-pane" id="DatabasesDeleteDb"><?php echo $aHtml[ 'DatabasesDeleteDb' ]; ?></div>
 					<div class="tab-pane" id="DatabasesDeleteUser"><?php echo $aHtml[ 'DatabasesDeleteUser' ]; ?></div>
 				</div>
 			</div>
-		<script LANGUAGE="JavaScript">
-			function confirmSubmit( sMessage ) {
-				var agree=confirm( sMessage );
-				if (agree)
-					return true ;
-				else
-					return false ;
-			}
-		</script>
-		<script type='text/javascript'>
-			jQuery( document ).ready(
-				function () {
-					jQuery( '*[rel=popover]')
-						.popover();
-					
-					jQuery( '*[data-popover=popover]')
-						.popover();
-				}
-			);
-		</script>
-		<!-- END: Popovers-enabling Javascript -->
 	<?php
-}
-
-function getConfirmBoxHtml() {
-
-	return '
-			<div class="control-group">
-				<label class="control-label" for="confirm_action">Type \'CONFIRM\' :</label>
-				<div class="controls">
-					<input type="text" id="confirm_action"" name="confirm_action" placeholder="Please confirm your intent" value="" />
-				</div>
-			</div>
-	';
+	
+	
 }
 

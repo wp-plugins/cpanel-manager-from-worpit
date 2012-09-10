@@ -3,7 +3,7 @@
 Plugin Name: cPanel Manager (from Worpit)
 Plugin URI: http://worpit.com/
 Description: A tool to connect to your Web Hosting cPanel account from within your WordPress.
-Version: 1.1
+Version: 1.2
 Author: Worpit
 Author URI: http://worpit.com/
 */
@@ -49,7 +49,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	protected $m_fSubmitCpmMainAttempt;
 	
-	static public $VERSION			= '1.1'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
+	static public $VERSION			= '1.2'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
 	
 	public function __construct(){
 		parent::__construct();
@@ -288,8 +288,8 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		$_POST[self::$OPTION_PREFIX.'cpanel_server_address'] = $sAddress;
 		$_POST[self::$OPTION_PREFIX.'cpanel_server_port'] = $iPort;
 		$_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'] = $_POST[self::$OPTION_PREFIX.'cpanel_security_access_key'];
-		$_POST[self::$OPTION_PREFIX.'cpanel_username'] = array( self::EncryptString( $sUsername, $_COOKIE[ self::SecurityAccessKeyCookieName ] ) );
-		$_POST[self::$OPTION_PREFIX.'cpanel_password'] = array( self::EncryptString( $_POST[self::$OPTION_PREFIX.'cpanel_password'],  $_COOKIE[ self::SecurityAccessKeyCookieName ] ) );
+		$_POST[self::$OPTION_PREFIX.'cpanel_username'] = $this->encryptOptionValue( $sUsername );
+		$_POST[self::$OPTION_PREFIX.'cpanel_password'] = $this->encryptOptionValue( $_POST[self::$OPTION_PREFIX.'cpanel_password'] );
 
 		$this->updatePluginOptionsFromSubmit( $_POST[self::$OPTION_PREFIX.'all_options_input'] );
 	}//handleSubmit_main
@@ -305,12 +305,11 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 			$sActionInclude = dirname( __FILE__ ).'/src/actions/CPM_ActionDelegate_'.ucfirst( $sActionGroup ).'.php';
 			
 			if ( file_exists( $sActionInclude ) ) {
-				
 				$aCpanelCredentials = array (
 						self::getOption('cpanel_server_address'),
 						self::getOption('cpanel_server_port'),
-						self::getOption('cpanel_username'),
-						self::getOption('cpanel_password'),
+						self::getOptionDecrypted('cpanel_username'),
+						self::getOptionDecrypted('cpanel_password'),
 				);
 
 				include_once( $sActionInclude );
@@ -319,6 +318,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 				$oActionDelegate = new $sClassName( $_POST, $aCpanelCredentials );
 				
 				if ( $oActionDelegate->getIsValidState() ) {
+					
 					$oActionDelegate->reset();
 					$this->m_aSubmitSuccess = $oActionDelegate->{$sActionMember}();
 					$this->m_aSubmitMessages = $oActionDelegate->getMessages();
@@ -371,10 +371,8 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		$this->readyAllPluginOptions();
 		
 		//Decrypt values for display on front end.
-		$sUsernameArray = self::getOption( 'cpanel_username' );
-		$sPasswordArray = self::getOption( 'cpanel_password' );
-		$this->m_aPluginOptions_CpmCredentialsSection['section_options'][2][1] = self::DecryptString( $sUsernameArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] );
-		$this->m_aPluginOptions_CpmCredentialsSection['section_options'][3][1] = self::DecryptString( $sPasswordArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] );
+		$this->m_aPluginOptions_CpmCredentialsSection['section_options'][2][1] = $this->getOptionDecrypted( 'cpanel_username' );
+		$this->m_aPluginOptions_CpmCredentialsSection['section_options'][3][1] = $this->getOptionDecrypted( 'cpanel_password' );
 		
 		//Specify what set of options are available for this page
 		$aAvailableOptions = array(
@@ -414,9 +412,6 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_EnableSection );
 		$sAllInputOptions .= ','.$this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_CpmCredentialsSection );
 		
-		$sUsernameArray = self::getOption( 'cpanel_username' );
-		$sPasswordArray = self::getOption( 'cpanel_password' );
-		
 		$aData = array(
 			'plugin_url'		=> self::$PLUGIN_URL,
 			'var_prefix'		=> self::$OPTION_PREFIX,
@@ -424,8 +419,8 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 			'cpanel_enabled'	=> self::getOption('enable_cpanel_manager_wordpress'),
 			'cpanel_server_address'		=> self::getOption('cpanel_server_address'),
 			'cpanel_server_port'		=> self::getOption('cpanel_server_port'),
-			'cpanel_username'	=> self::DecryptString( $sUsernameArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] ),
-			'cpanel_password'	=> self::DecryptString( $sPasswordArray[0], $_COOKIE[ self::SecurityAccessKeyCookieName ] ),
+			'cpanel_username'	=> $this->getOptionDecrypted('cpanel_username'),
+			'cpanel_password'	=> $this->getOptionDecrypted('cpanel_password'),
 			'aAllOptions'		=> $aAvailableOptions,
 			'page_link_options'		=> $this->getSubmenuId('main'),
 			'page_link_security'	=> $this->getSubmenuId('security'),
@@ -523,9 +518,43 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		
 	}//adminNoticeSubmitMessages
 	
-	public static function EncryptString( $insText, $insSalt ) {
+	/**
+	 * Assumes that the option value is ALWAYS a 1D array with 1 element (i.e. a serialized option)
+	 * 
+	 * @param $insKey
+	 */
+	private function getOptionDecrypted( $insKey ) {
+		$sEncryptedOption = self::getOption( $insKey ); //returns an array of 1 element.
+		
+		if ( !isset($sEncryptedOption[0]) ) {
+			return '';
+		}
+		
+		$sEncryptedOption = $sEncryptedOption[0];
+		$sSalt = (isset($_COOKIE[ self::SecurityAccessKeyCookieName ]))? $_COOKIE[ self::SecurityAccessKeyCookieName ] : '';
+		return self::DecryptString( $sEncryptedOption, $sSalt );
+	}
+	
+	/**
+	 * Assumes that the option value is ALWAYS a 1D array with 1 element (i.e. a serialized option)
+	 * 
+	 * @param $insKey
+	 * @param $insValue
+	 */
+	private function updateOptionEncrypted( $insKey, $insValue ) {
+		return self::updateOption( $insKey, $this->encryptOptionValue($insValue) );
+	}
+	
+	private function encryptOptionValue( $insValue ) {
+		$sSalt = (isset($_COOKIE[ self::SecurityAccessKeyCookieName ]))? $_COOKIE[ self::SecurityAccessKeyCookieName ] : '';
+		$sEncryptedValue = array( self::EncryptString( $insValue, $sSalt ) );
+		return $sEncryptedValue;
+	}
+	
+	
+	public static function EncryptString( $insText, $insSalt = '' ) {
 
-		if ( !extension_loaded( 'mcrypt' ) )
+		if ( !extension_loaded( 'mcrypt' ) || empty($insSalt) )
 			return $insText;
 		
 		return trim(
@@ -542,9 +571,9 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 				);
 	} 
 	
-	public static function DecryptString( $insText, $insSalt ) {
+	public static function DecryptString( $insText, $insSalt = '' ) {
 
-		if ( !extension_loaded( 'mcrypt' ) )
+		if ( !extension_loaded( 'mcrypt' ) || empty($insSalt) )
 			return $insText;
 		
 		return trim(

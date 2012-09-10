@@ -106,6 +106,13 @@ class CPanel_Api {
 	 * "Mysql", "deluser", array( "Username" )
 	 * "Mysql", "deldb", array( "Database Name" )
 	 * "Mysql", "adduserdb", array( "Database Name", "Username", 'all' )
+	 * "Ftp", "addftp"
+				$aArgs = array(
+					'user'		=> $insUsername,
+					'pass'		=> $insPassword,
+					'quota'		=> $iniQuota,
+					'homedir'	=> $insHomedir
+				);
 	 *  
 	 * @param String $insModule
 	 * @param String $insFunction

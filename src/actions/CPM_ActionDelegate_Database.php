@@ -22,81 +22,13 @@
  */
 
 include_once( dirname(__FILE__).'/../../inc/lib/worpit/Worpit_CPanelTransformer.php' );
+include_once( dirname(__FILE__).'/CPM_ActionDelegate_Base.php' );
 
-class CPM_ActionDelegate_Database {
-	
-	protected $m_aData; // likely comes from $_POST
-	protected $m_oCpanel_Api;
-	protected $m_oLastApiResponse;
-	
-	protected $m_aMessages;
-	
-	protected $m_fGoodToGo;
+class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 	
 	public function __construct( $inaData, $inaCpanelCreds ) {
 		$this->m_aData = $inaData;
 		$this->m_fGoodToGo = $this->connectToCpanel( $inaCpanelCreds );
-	}
-	
-	public function getMessages() {
-		return $this->m_aMessages;
-	}
-	
-	public function getIsValidState() {
-		return $this->m_fGoodToGo;
-	}
-	
-	/**
-	 * Given certain cPanel Credentials attempts to create a CPanel_Api object.
-	 * 
-	 * Returns true upon success. False otherwise.
-	 * 
-	 * @param $inaData - cPanel Credentials
-	 */
-	public function connectToCpanel( $inaCpanelCreds ) {
-		
-		list( $sServerAddress, $sServerPort, $sUsername, $sPassword ) = $inaCpanelCreds;
-		
-		$this->m_oCpanel_Api = null;
-		$this->m_aMessages = array();
-		$fValidConnectionData = true;
-		
-		if ( empty($sServerAddress) ) {
-			$this->m_aMessages[] = 'cPanel Server Address is empty.';
-			$fValidConnectionData = false;
-		}
-		
-		if ( empty($sServerPort) ) {
-			$this->m_aMessages[] = 'cPanel Server Port is empty.';
-			$fValidConnectionData = false;
-		}
-		if ( empty($sUsername) ) {
-			$this->m_aMessages[] = 'cPanel Username is empty.';
-			$fValidConnectionData = false;
-		}
-		if ( empty($sPassword) ) {
-			$this->m_aMessages[] = 'cPanel Password is empty.';
-			$fValidConnectionData = false;
-		}
-		
-		if ( $fValidConnectionData ) {
-			try {
-				$this->m_oCpanel_Api = new CPanel_Api($sServerAddress, $sUsername, $sPassword);
-			} catch (Exception $oE) {
-				$this->m_aMessages[] = 'Failed to connect to cPanel with credentials provided. Error returned was... <strong>'.$oE->getMessage().'</strong>';
-			}
-		}
-
-		return !is_null( $this->m_oCpanel_Api );
-	}
-	
-	public function reset( $inaData = null ) {
-		
-		$this->m_aMessages = array();
-		
-		if ( !is_null( $inaData ) ) {
-			$this->m_aData = $inaData;
-		}
 	}
 	
 	/**
@@ -107,25 +39,14 @@ class CPM_ActionDelegate_Database {
 	 */
 	public function createdb_adduser() {
 		
-		$sErrorPrefix = "No attempt was made to create a new database and add new user because: ";
-		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty( $this->m_aData ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
-			return false;
-		}
-		if ( !isset( $this->m_aData['confirm_action'] ) || !self::ValidateConfirmAction( $this->m_aData['confirm_action'], $this->m_aMessages ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."You need to type CONFIRM in the confirmation box before any action occurs.";
+		if ( !$this->preActionBasicValidate( 'create a new database and add new user' ) ) {
 			return false;
 		}
 		
 		$fValidState = true;
 		$fValidState = self::ValidateDatabaseName( $this->m_aData['database_name'], $this->m_aMessages ) && $fValidState;
 		$fValidState = self::ValidateDatabaseUser( $this->m_aData['database_user'], $this->m_aMessages ) && $fValidState;
-		$this->m_fGoodToGo = self::ValidateDatabaseUserPassword( $this->m_aData['database_user_password'], $this->m_aMessages ) && $fValidState;
+		$this->m_fGoodToGo = self::ValidateUserPassword( $this->m_aData['database_user_password'], $this->m_aMessages ) && $fValidState;
 		
 		if ( !$this->m_fGoodToGo ) {
 			$this->m_aMessages[] = $sErrorPrefix."Your inputs had problems. Please Check.";
@@ -161,24 +82,13 @@ class CPM_ActionDelegate_Database {
 	 */
 	public function create_mysqluser() {
 		
-		$sErrorPrefix = "No attempt was made to create new MySQL user because: ";
-		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty( $this->m_aData ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
-			return false;
-		}
-		if ( !isset( $this->m_aData['confirm_action'] ) || !self::ValidateConfirmAction( $this->m_aData['confirm_action'], $this->m_aMessages ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."You need to type CONFIRM in the confirmation box before any action occurs.";
+		if ( !$this->preActionBasicValidate( 'create new MySQL user' ) ) {
 			return false;
 		}
 
 		$fValidState = true;
 		$fValidState = self::ValidateDatabaseUser( $this->m_aData['database_new_user'], $this->m_aMessages ) && $fValidState;
-		$this->m_fGoodToGo = self::ValidateDatabaseUserPassword( $this->m_aData['database_new_user_password'], $this->m_aMessages ) && $fValidState;
+		$this->m_fGoodToGo = self::ValidateUserPassword( $this->m_aData['database_new_user_password'], $this->m_aMessages ) && $fValidState;
 		
 		if ( !$this->m_fGoodToGo ) {
 			$this->m_aMessages[] = $sErrorPrefix."Your inputs had problems. Please Check.";
@@ -204,7 +114,6 @@ class CPM_ActionDelegate_Database {
 		
 	}//create_mysqluser
 	
-	
 	/**
 	 * Will delete all databases from the cPanel account with names that correspond to elements
 	 * in the array that is populated in position 'databases_to_delete_names' in the main data array. 
@@ -212,20 +121,10 @@ class CPM_ActionDelegate_Database {
 	 */
 	public function delete_mysqldbs() {
 		
-		$sErrorPrefix = "No attempt was made to delete MySQL database because: ";
+		if ( !$this->preActionBasicValidate( 'delete MySQL databases' ) ) {
+			return false;
+		}
 		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty( $this->m_aData ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
-			return false;
-		}
-		if ( !isset( $this->m_aData['confirm_action'] ) || !self::ValidateConfirmAction( $this->m_aData['confirm_action'], $this->m_aMessages ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."You need to type CONFIRM in the confirmation box before any action occurs.";
-			return false;
-		}
 		if ( !isset( $this->m_aData['databases_to_delete_names'] ) || !is_array( $this->m_aData['databases_to_delete_names'] ) ) {
 			$this->m_aMessages[] = $sErrorPrefix."No MySQL databases were selected.";
 			return false;
@@ -265,18 +164,7 @@ class CPM_ActionDelegate_Database {
 	 */
 	public function delete_mysqlusers() {
 		
-		$sErrorPrefix = "No attempt was made to delete MySQL users because: ";
-		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty( $this->m_aData ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
-			return false;
-		}
-		if ( !isset( $this->m_aData['confirm_action'] ) || !self::ValidateConfirmAction( $this->m_aData['confirm_action'], $this->m_aMessages ) ) {
-			$this->m_aMessages[] = $sErrorPrefix."You need to type CONFIRM in the confirmation box before any action occurs.";
+		if ( !$this->preActionBasicValidate( 'delete MySQL users' ) ) {
 			return false;
 		}
 		
@@ -320,14 +208,7 @@ class CPM_ActionDelegate_Database {
 	 */
 	protected function createNewMySqlDb( $sDbName ) {
 		
-		$sErrorPrefix = "No attempt was made to create a new MySQL database: ";
-		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty($this->m_aData) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
+		if ( !$this->preActionBasicValidate( 'create a new MySQL database' ) ) {
 			return false;
 		}
 		
@@ -349,14 +230,7 @@ class CPM_ActionDelegate_Database {
 	
 	public function createNewMySqlUser( $sUsername, $sPassword ) {
 		
-		$sErrorPrefix = "No attempt was made to create a new MySQL User: ";
-		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty($this->m_aData) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
+		if ( !$this->preActionBasicValidate( 'create a new MySQL User' ) ) {
 			return false;
 		}
 		
@@ -378,14 +252,7 @@ class CPM_ActionDelegate_Database {
 	
 	public function addMySqlUserToDb( $sDbName, $sUsername ) {
 		
-		$sErrorPrefix = "No attempt was made to add new MySQL User to the DB because: ";
-		
-		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix.'The system is not currently in a valid state.';
-			return false;
-		}
-		if ( empty($this->m_aData) ) {
-			$this->m_aMessages[] = $sErrorPrefix."The data from which we're supposed to work is empty/null.";
+		if ( !$this->preActionBasicValidate( 'add new MySQL User to the DB' ) ) {
 			return false;
 		}
 		
@@ -405,83 +272,5 @@ class CPM_ActionDelegate_Database {
 		
 	}
 	
-	public function deleteMySqlDatabases() {
-		
-	}//deleteMySqlDatabases
-	
-	public static function ValidateDatabaseName( $sDatabaseName, &$aMessages ) {
-		
-		$fValidState = true;
-		if ( !empty( $sDatabaseName ) ) {
-		
-			if ( !self::IsAlphaNumeric($sDatabaseName) ) {
-				$aMessages[] = "The database name option is not numbers/letters (abc123...).";
-				$fValidState = false;
-			}
-			if ( strlen($sDatabaseName) > 63 ) {
-				$aMessages[] = "The database name option is too long ( 63 characters or less ).";
-				$fValidState = false;
-			}
-		}
-		else {
-			$aMessages[] = "The database name option is blank.";
-			$fValidState = false;
-		}
-		return $fValidState;
-	}//ValidateDatabaseName
-	
-	public static function ValidateDatabaseUser( $sDatabaseUser, &$aMessages ) {
-		
-		$fValidState = true;
-		if ( !empty( $sDatabaseUser ) ) {
-		
-			if ( !self::IsAlphaNumeric($sDatabaseUser) ) {
-				$aMessages[] = "The database user option is not numbers/letters only (abc123...).";
-				$fValidState = false;
-			}
-			if ( strlen($sDatabaseUser ) > 7 ) {
-				$aMessages[] = "The database user option is too long ( 7 characters or less ).";
-				$fValidState = false;
-			}
-		}
-		else {
-			$aMessages[] = "The database user option is blank.";
-			$fValidState = false;
-		}
-		return $fValidState;
-	}//validateDatabaseUser
-	
-	public static function ValidateDatabaseUserPassword( $sDatabaseUserPassword, &$aMessages ) {
-		
-		$fValidState = true;
-		if ( !empty( $sDatabaseUserPassword ) ) {
-			
-			if ( strlen($sDatabaseUserPassword ) < 6 ) {
-				$aMessages[] = "The database user password option is too short ( 6 characters or more ).";
-				$fValidState = false;
-			}
-		}
-		else {
-			$aMessages[] = "The database user password option is blank.";
-			$fValidState = false;
-		}
-		return $fValidState;
-	}//validateDatabaseUser
-	
-	public static function ValidateConfirmAction( $sConfirmText, &$aMessages ) {
-		
-		$fValidState = true;
-		
-		if ( empty( $sConfirmText ) || !preg_match( '/^CONFIRM$/', $sConfirmText ) ) {
-			$fValidState = false;
-		}
-		
-		return $fValidState;
-	}//validateDatabaseUser
-	
-	protected static function IsAlphaNumeric( $insString = '' ) {
-		return preg_match( '/^[A-Za-z0-9]+$/', $insString );
-	} 
-
 }//class
 			
