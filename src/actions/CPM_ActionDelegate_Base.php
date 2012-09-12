@@ -240,13 +240,10 @@ class CPM_ActionDelegate_Base {
 		return $fValidState;
 	}//ValidateFtpQuota
 	
-	public static function ValidateUserHomedir( $insHomedir, &$aMessages ) {
-	
+	public static function ValidateDirectory( $insHomedir, &$aMessages ) {
+		
 		$fValidState = true;
 		if ( !empty( $insHomedir ) ) {
-			
-			$insHomedir = trim($insHomedir);
-			$insHomedir = trim($insHomedir, '/');
 	
 			if ( !self::IsDirectory($insHomedir) ) {
 				$aMessages[] = "The Home Directory provided isn't a valid directory name.";
@@ -260,7 +257,7 @@ class CPM_ActionDelegate_Base {
 		
 		return $fValidState;
 		
-	}//ValidateUserHomedir
+	}//ValidateDirectory
 	
 	public static function ValidateConfirmAction( $sConfirmText, &$aMessages ) {
 		
@@ -274,7 +271,7 @@ class CPM_ActionDelegate_Base {
 	}//validateDatabaseUser
 	
 	protected static function IsDirectory( $insString = '' ) {
-		return preg_match( '/^[A-Za-z0-9\/]+$/', $insString );
+		return preg_match( '/^[-_A-Za-z0-9\/]+$/', $insString );
 	}
 	protected static function IsAlphaNumeric( $insString = '' ) {
 		return preg_match( '/^[A-Za-z0-9]+$/', $insString );
@@ -282,5 +279,20 @@ class CPM_ActionDelegate_Base {
 	protected static function IsNumeric( $insString = '' ) {
 		return preg_match( '/^[0-9]+$/', $insString );
 	} 
-
-}//CPM_ActionDelegate_Ftp
+	
+	static public function IsValidDomainName( $insUrl ) {
+	
+		$aPieces = explode( ".", $insUrl );
+		foreach($aPieces as $sPiece) {
+			if ( !preg_match('/^[a-z\d][a-z\d-]{0,62}$/i', $sPiece) || preg_match('/-$/', $sPiece) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static function IsValidSubDomain( $insString = '' ) {
+		return preg_match( '/^[-A-Za-z0-9]+$/', $insString );
+	}
+	
+}//CPM_ActionDelegate_Base

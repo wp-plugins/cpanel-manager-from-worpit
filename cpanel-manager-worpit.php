@@ -3,7 +3,7 @@
 Plugin Name: cPanel Manager (from Worpit)
 Plugin URI: http://worpit.com/
 Description: A tool to connect to your Web Hosting cPanel account from within your WordPress.
-Version: 1.3
+Version: 1.4
 Author: Worpit
 Author URI: http://worpit.com/
 */
@@ -32,7 +32,6 @@ Author URI: http://worpit.com/
 define( 'DS', DIRECTORY_SEPARATOR );
 
 include_once( dirname(__FILE__).'/src/worpit-plugins-base.php' );
-include_once( dirname(__FILE__).'/inc/lib/worpit/cpanel_api.php' );
 include_once( dirname(__FILE__).'/inc/lib/worpit/Worpit_CPanelTransformer.php' );
 
 class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
@@ -49,7 +48,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	protected $m_fSubmitCpmMainAttempt;
 	
-	static public $VERSION			= '1.3'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
+	static public $VERSION			= '1.4'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
 	
 	public function __construct(){
 		parent::__construct();
@@ -247,14 +246,6 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		
 	}//handleSubmit_security
 	
-	private function turnSecureAccessOn( $sAccessKey ) {
-		$_COOKIE[ self::SecurityAccessKeyCookieName ] = $sAccessKey;
-		setcookie( self::SecurityAccessKeyCookieName, $sAccessKey, time()+3600, COOKIEPATH, COOKIE_DOMAIN, false );
-	}
-	private function turnSecureAccessOff( ) {
-		unset( $_COOKIE[ self::SecurityAccessKeyCookieName ] );
-		setcookie( self::SecurityAccessKeyCookieName, "", time()-3600, COOKIEPATH, COOKIE_DOMAIN, false);
-	}
 	
 	protected function handleSubmit_main() {
 
@@ -551,6 +542,14 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		return $sEncryptedValue;
 	}
 	
+	private function turnSecureAccessOn( $sAccessKey ) {
+		$_COOKIE[ self::SecurityAccessKeyCookieName ] = $sAccessKey;
+		setcookie( self::SecurityAccessKeyCookieName, $sAccessKey, time()+3600, COOKIEPATH, COOKIE_DOMAIN, false );
+	}
+	private function turnSecureAccessOff( ) {
+		unset( $_COOKIE[ self::SecurityAccessKeyCookieName ] );
+		setcookie( self::SecurityAccessKeyCookieName, "", time()-3600, COOKIEPATH, COOKIE_DOMAIN, false);
+	}
 	
 	public static function EncryptString( $insText, $insSalt = '' ) {
 

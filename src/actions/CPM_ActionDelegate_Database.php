@@ -275,7 +275,7 @@ class CPM_ActionDelegate_Database extends CPM_ActionDelegate_Base {
 		
 		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
 			$fSuccess = true;
-			$this->m_aMessages[] = "Adding new MySQL User ('$sUsername') to DB ('$sDbName') succeeded: "; 
+			$this->m_aMessages[] = "Adding new MySQL User ('$sUsername') to DB ('$sDbName') succeeded."; 
 		}
 		else {
 			$fSuccess = false;

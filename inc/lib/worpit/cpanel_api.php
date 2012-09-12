@@ -51,6 +51,7 @@ class CPanel_Api {
 		'DomainLookup'	=> array( 'getbasedomains', 'getdocroot', 'getdocroots', 'countbasedomains' ),
 		'SubDomain'		=> array( 'listsubdomains', 'delsubdomain', 'addsubdomain' ),
 		'Park'			=> array( 'park', 'unpark', 'listparkeddomains', 'listaddondomains' ),
+		'StatsBar'		=> array( 'stat' ),
 	);
 	
 	public function __construct( $insIP, $insUsername, $insPassword ) {

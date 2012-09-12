@@ -41,8 +41,6 @@ include_once( dirname(__FILE__).DS.'widgets'.DS.'worpit_widgets.php' );
 			}
 			?>
 			
-			
-			
 			</div><!-- / span9 -->
 			<div class="span3" id="side_widgets">
 	  			<?php echo getWidgetIframeHtml( 'cpm-side-widgets' ); ?>

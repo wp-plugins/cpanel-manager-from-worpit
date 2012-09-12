@@ -228,21 +228,40 @@ class Worpit_CPanelTransformer {
 	 */
 	public static function GetList_AllFtpUsers( $inaApiResponse ) {
 		
-		$aAllFtpUsersData = self::GetDataArray( $inaApiResponse, 'user' );
-		$aMainFtpUserList = array();
+		return self::GetListFromData( $inaApiResponse, 'user' );
 		
-		if ( !empty($aAllFtpUsersData) ) { //Last API call passed.
+	}//GetList_AllFtpUsers
+	
+	/**
+	 * 
+	 * @param $inaApiResponse
+	 */
+	public static function GetListFromData( $inaApiResponse, $insDataKey, $insListIdKey = '' ) {
+		
+		$aList = array();
+		
+		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
+			return $aList;
+		}
+		
+		$aData = self::GetDataArray( $inaApiResponse, $insDataKey );
+
+		if ( empty($insListIdKey) ) {
+			$insListIdKey = $insDataKey;
+		}
+		
+		if ( !empty($aData) ) { //Last API call passed.
 			
-			foreach ( $aAllFtpUsersData as $aFtpUser  ) {
-				if ( isset($aFtpUser['user']) ) {
-					$aMainFtpUserList[] = $aFtpUser['user'];
+			foreach ( $aData as $aElement  ) {
+				if ( isset($aElement[$insListIdKey]) ) {
+					$aList[] = $aElement[$insListIdKey];
 				}
 			}
 		}
 		
-		return $aMainFtpUserList;
+		return $aList;
 		
-	}//GetList_AllFtpUsers
+	}//GetListFromData
 	
 	/**
 	 * 
@@ -271,19 +290,19 @@ class Worpit_CPanelTransformer {
 	 * 
 	 * @param unknown_type $inaApiResponse
 	 */
-	public static function GetDataArray( $inaApiResponse, $sTestKey ) {
+	public static function GetDataArray( $inaApiResponse, $insDataKey ) {
 		
 		$aData = array();
 		
 		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
-			return $aDatabases;
+			return $aData;
 		}
 		
 		$aResponseData = self::GetDataFromResponse( $inaApiResponse, 'data' );
 		
 		if ( !empty($aResponseData) ) {
 			
-			if ( array_key_exists( $sTestKey, $aResponseData ) ) { //there's only 1 Database in this data set
+			if ( array_key_exists( $insDataKey, $aResponseData ) ) { //there's only 1 Database in this data set
 				$aData[] = $aResponseData;
 			}
 			else {
@@ -295,7 +314,37 @@ class Worpit_CPanelTransformer {
 		return $aData;
 	}
 	
+	public static function GetData_AllStatsData( $inaApiResponse ) {
+		
+		$aStatsData = array();
+		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
+			return $aStatsData;
+		}
+		
+		$aResponseData = self::GetDataArray( $inaApiResponse, 'name' );
+		return $aResponseData;
+	}
 	
+	public static function GetData_OneStatData( $inaApiResponse, $sStatsDataName ) {
+		
+		$aStatsData = array();
+		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
+			return $aStatsData;
+		}
+		
+		$aResponseData = self::GetData_AllStatsData( $inaApiResponse );
+		
+		if ( !empty($aResponseData) ) {
+			foreach( $aResponseData as $aResponse ) {
+				if ( $aResponse['name'] == $sStatsDataName ) {
+					$aStatsData = $aResponse;
+				}
+			}
+		}
+		
+		return $aStatsData;
+		
+	}
 	
 	
 	

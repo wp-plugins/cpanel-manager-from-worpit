@@ -5,6 +5,37 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	$aHtml = array();
 	$sHtml = '';
 	
+/*
+	//Perform Main cPanel Stats query for Databases
+	$aMysqlStatsFields = array( 'sqldatabases', 'mysqldiskusage', 'mysqlversion' );
+	$inoCpanelApi->doApiFunction( 'StatsBar', 'stat', array( 'display' => implode( '|', $aMysqlStatsFields ) ) );
+	$oLastResponse = $inoCpanelApi->getLastResponse();
+	$aMysqlStats = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'name' );
+
+	//Perform Main cPanel Databases API query
+	$inoCpanelApi->doApiFunction( 'MysqlFE', 'listdbs' );
+	$oLastResponse = $inoCpanelApi->getLastResponse();
+
+	$sCpanelJumpUrlStem = "http://$sServerAddress:$sServerPort/login/?user=$sUsername&pass=$sPassword&goto_uri=";
+
+	if ( Worpit_CPanelTransformer::GetLastSuccess($oLastResponse) ) { //Last API call was a success.
+		
+		$aDbData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'db' );
+
+		if ( !empty($aDbData) ) {
+			
+			$sMySqlVersion = Worpit_CPanelTransformer::GetData_OneStatData( 'mysqlversion' );
+			$sMySqlVersion = $sMySqlVersion[ 'value' ];
+
+			$sHtml = '<div class="well">
+			<h4>MySQL Databases and Attached MySQL Users</h4>
+			<ul>
+				<li>MySQL Version: '.$sMySqlVersion.'</li>
+				<li>MySQL Quote Usage: </li>
+				<li>MySQL Disk Usage: </li>
+			</ul>			
+*/
+
 	list($sServerAddress, $sServerPort, $sUsername, $sPassword, $sNonce, $sFormAction ) = $inaConnectionData;
 	$sServerPort = 2082; //override for now
 	
@@ -86,7 +117,7 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	ob_end_clean();
 	
 	
-	$aHtml[ 'FTPInfo' ] = $sHtml;
+	$aHtml[ 'DatabasesInfo' ] = $sHtml;
 	
 	/*
 	 * Create HTML for Tab: New Database
@@ -274,14 +305,14 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	?>
 			<div id="TabsFunctionMySql" class="tabbable tabs-function">
 				<ul class="nav nav-pills">
-					<li class="active"><a href="#DatabasesInfo" data-toggle="tab">Info</a></li>
-					<li><a href="#DatabasesNewDb" data-toggle="tab">New Database</a></li>
-					<li><a href="#DatabasesNewUser" data-toggle="tab">New MySQL User</a></li>
-					<li><a href="#DatabasesDeleteDb" data-toggle="tab">Delete Database</a></li>
-					<li><a href="#DatabasesDeleteUser" data-toggle="tab">Delete MySQL User</a></li>
+					<li class="active"><a href="#DatabasesInfo" data-toggle="tab">Stats</a></li>
+					<li><a href="#DatabasesNewDb" data-toggle="tab">New DB</a></li>
+					<li><a href="#DatabasesNewUser" data-toggle="tab">New User</a></li>
+					<li><a href="#DatabasesDeleteDb" data-toggle="tab">Delete DBs</a></li>
+					<li><a href="#DatabasesDeleteUser" data-toggle="tab">Delete Users</a></li>
 				</ul>
 				<div class="tab-content">
-					<div class="tab-pane active" id="DatabasesInfo"><?php echo $aHtml[ 'FTPInfo' ]; ?></div>
+					<div class="tab-pane active" id="DatabasesInfo"><?php echo $aHtml[ 'DatabasesInfo' ]; ?></div>
 					<div class="tab-pane" id="DatabasesNewDb"><?php echo $aHtml[ 'DatabasesNewDb' ]; ?></div>
 					<div class="tab-pane" id="DatabasesNewUser"><?php echo $aHtml[ 'DatabasesNewUser' ]; ?></div>
 					<div class="tab-pane" id="DatabasesDeleteDb"><?php echo $aHtml[ 'DatabasesDeleteDb' ]; ?></div>

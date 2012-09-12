@@ -4,7 +4,7 @@ Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
 Tested up to: 3.4
-Stable tag: 1.3
+Stable tag: 1.4
 
 == Description ==
 
@@ -26,8 +26,14 @@ Currently you can:
 
 *	View a list of all FTP users.
 *	Add a new FTP user
-*	Add new FTP users in bulk.
-*	Delete FTP users in bulk (with option to remove ftp directories)
+*	Add new FTP users IN BULK.
+*	Delete FTP users IN BULK (with option to remove ftp directories)
+
+= Sub Domains =
+
+*	View all sub domains along with their full document root path and their redirection status
+*	Add a new sub domain
+*	Delete sub domains IN BULK.
 
 With it (in time) you will be able to perform many convenient functions from within your WordPress site that
 you would otherwise need to log into your cPanel to do.
@@ -104,6 +110,11 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * add file handling and file manager jump links
 * add ability to perform FULL cPanel backup and FTP offsite
 * add ability to perform cPanel backup of MySQL databases and FTP offsite
+* use ajax calls to load only necessary data to reduce API calls.
+
+= 1.4 =
+
+* ADDED: Sub Domain management - lists sub domains / add new sub domains / delete sub domains.
 
 = 1.3 =
 
@@ -127,6 +138,10 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * First Release.
 
 == Upgrade Notice ==
+
+= 1.4 =
+
+* ADDED: Sub Domain management - lists sub domains / add new sub domains / delete sub domains.
 
 = 1.3 =
 

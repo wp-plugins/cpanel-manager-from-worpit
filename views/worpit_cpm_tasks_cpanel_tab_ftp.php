@@ -17,17 +17,22 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 		if ( !empty($aAllFtpUserData) ) {
 
 			$sHtml = '<div class="well">
-			<h4>FTP Users and their Home Directories</h4>
-			<ul>';
+			<h4>FTP Users and their Home Directories</h4>';
 			foreach( $aAllFtpUserData as $aFtpUser ) {
 				$sHomeDir = $aFtpUser[ 'homedir' ];
 				$sUserType = $aFtpUser[ 'type' ];
 				$sUserName = $aFtpUser[ 'user' ];
 				
-				$sHtml .= "<li>$sUserName ( <span class=\"user_homedir\">$sHomeDir</span> )</li>";
+				$sHtml .= "<h5>$sUserName</h5>";
+				$sHtml .= "
+					<ul>
+						<li><span class=\"user_homedir\">$sHomeDir</span></li>
+						<li>Type: $sUserType</li>
+					</ul>
+				";
 				
 			}
-			$sHtml .= '</ul></div>';
+			$sHtml .= '</div>';
 
 
 		} else {
