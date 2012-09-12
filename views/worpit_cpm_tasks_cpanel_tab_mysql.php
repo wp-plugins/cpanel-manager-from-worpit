@@ -305,11 +305,11 @@ function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
 	?>
 			<div id="TabsFunctionMySql" class="tabbable tabs-function">
 				<ul class="nav nav-pills">
-					<li class="active"><a href="#DatabasesInfo" data-toggle="tab">Stats</a></li>
-					<li><a href="#DatabasesNewDb" data-toggle="tab">New DB</a></li>
-					<li><a href="#DatabasesNewUser" data-toggle="tab">New User</a></li>
-					<li><a href="#DatabasesDeleteDb" data-toggle="tab">Delete DBs</a></li>
-					<li><a href="#DatabasesDeleteUser" data-toggle="tab">Delete Users</a></li>
+					<li class="active"><a href="#DatabasesInfo" data-toggle="tab"><i class="icon icon-info-sign"></i></a></li>
+					<li><a href="#DatabasesNewDb" data-toggle="tab"><i class="icon icon-plus-sign"></i> Database</a></li>
+					<li><a href="#DatabasesNewUser" data-toggle="tab"><i class="icon icon-plus-sign"></i> User</a></li>
+					<li><a href="#DatabasesDeleteDb" data-toggle="tab"><i class="icon icon-minus-sign"></i> Databases</a></li>
+					<li><a href="#DatabasesDeleteUser" data-toggle="tab"><i class="icon icon-minus-sign"></i> Users</a></li>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="DatabasesInfo"><?php echo $aHtml[ 'DatabasesInfo' ]; ?></div>

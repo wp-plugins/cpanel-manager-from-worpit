@@ -88,6 +88,172 @@ class CPM_ActionDelegate_Domain extends CPM_ActionDelegate_Base {
 		
 	}//createNewSubDomain
 	
+	/**
+	 * Will delete all databases from the cPanel account with names that correspond to elements
+	 * in the array that is populated in position 'databases_to_delete_names' in the main data array.
+	 *
+	 */
+	public function delete_subdomains() {
+	
+		$aVars = array();
+	
+		if ( !$this->preActionBasicValidate( $aVars, 'to delete Sub Domains' ) ) {
+			return false;
+		}
+	
+		if ( !isset( $this->m_aData['subdomains_to_delete_names'] ) || !is_array( $this->m_aData['subdomains_to_delete_names'] ) ) {
+			$this->m_aMessages[] = "No Sub Domains were selected.";
+			return false;
+		}
+	
+		$aSubDomains = $this->m_aData['subdomains_to_delete_names'];
+	
+		$fSuccess = true;
+		foreach( $aSubDomains as $sSubDomain ) {
+	
+			$aArgs = array ( 'domain' => $sSubDomain );
+	
+			$this->m_oCpanel_Api->doApiFunction( "SubDomain", "delsubdomain", $aArgs );
+			$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+	
+			if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+				$fSuccess = true;
+				$this->m_aMessages[] = "Deleting Sub Domain ($sSubDomain) from cPanel account succeeded.";
+			}
+			else {
+				$fSuccess = false;
+				$this->m_aMessages[] = "Deleting Sub Domain ($sSubDomain) from cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
+				$this->m_aMessages[] = "Stopping further processing due to previous failure.";
+			}
+	
+			if ( !$fSuccess ) {
+				break;
+			}
+		}
+	
+		return $fSuccess;
+	}
+	
+	public function create_parkeddomain() {
+		
+		$aVars = array( 'parkeddomain_new_domain', 'parkeddomain_redirect_http', 'parkeddomain_redirect_url' );
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new parked domain' ) ) {
+			return false;
+		}
+		
+		$fValidState = true;
+		$this->m_fGoodToGo = self::ValidateFullDomain( $this->m_aData['parkeddomain_new_domain'], $this->m_aMessages ) && $fValidState;
+		
+		if ( !$this->m_fGoodToGo ) {
+			$this->m_aMessages[] = "Your inputs had problems. Please Check.";
+			return false;
+		}
+		
+		$fSuccess = true;
+		if ( $this->createNewParkedDomain( $this->m_aData['parkeddomain_new_domain'], $this->m_aData['parkeddomain_top_domain'] ) ) {
+			
+			//redirect if URL is specified
+			if ( !empty( $this->m_aData['parkeddomain_redirect_url'] ) ) {
+				
+				$sRedirectUrl = $this->m_aData['parkeddomain_redirect_http'] . $this->m_aData['parkeddomain_redirect_url'];
+				$fSuccess = $this->redirectParkedDomain( $this->m_aData['parkeddomain_new_domain'], $sRedirectUrl);
+			}
+			
+		} else {
+			$fSuccess = false;
+			$this->m_aMessages[] = "No attempt was made to perform any other actions due to previous error."; 
+		}
+		
+		return $fSuccess;
+	}
+	
+	public function createNewParkedDomain( $insDomain, $insTopDomain = '' ) {
+		
+		$aArgs = array(	'domain' => $insDomain );
+		if ( !empty($insTopDomain) ) {
+			$aArgs['topdomain'] = $insTopDomain;
+		}
+		
+		$this->m_oCpanel_Api->doApiFunction( "Park", "park", $aArgs );
+		$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+		
+		$fSuccess = false;
+		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+			$fSuccess = true;
+			$this->m_aMessages[] = "Adding new Parked Domain ($insDomain) succeeded."; 
+		}
+		else {
+			$this->m_aMessages[] = "Adding new Parked Domain ($insDomain) FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse ); 
+		}
+		
+		return $fSuccess;
+		
+	}
+	
+	public function redirectParkedDomain( $insDomain, $insRedirectUrl ) {
+		
+		$aArgs = array(	'domain' => $insDomain, 'url' => $insRedirectUrl );
+		var_dump($aArgs);
+		$this->m_oCpanel_Api->doApiFunction( "Park", "setredirecturl", $aArgs );
+		$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+		
+		$fSuccess = false;
+		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+			$fSuccess = true;
+			$this->m_aMessages[] = "Redirecting Parked Domain ($insDomain => $insRedirectUrl) succeeded."; 
+		}
+		else {
+			$this->m_aMessages[] = "Redirecting Parked Domain ($insDomain => $insRedirectUrl) FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse ); 
+		}
+		
+		return $fSuccess;
+		
+	}
+	
+	public function delete_parkeddomains() {
+	
+		$aVars = array();
+	
+		if ( !$this->preActionBasicValidate( $aVars, 'to delete Parked Domains' ) ) {
+			return false;
+		}
+	
+		if ( !isset( $this->m_aData['parkeddomains_to_delete_names'] ) || !is_array( $this->m_aData['parkeddomains_to_delete_names'] ) ) {
+			$this->m_aMessages[] = "No Parked Domains were selected.";
+			return false;
+		}
+	
+		$aParkedDomains = $this->m_aData['parkeddomains_to_delete_names'];
+	
+		$fSuccess = true;
+		foreach( $aParkedDomains as $sDomain ) {
+
+			$aArgs = array ( 'domain' => $sDomain );
+	
+			$this->m_oCpanel_Api->doApiFunction( "Park", "unpark", $aArgs );
+			$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+	
+			if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+				$this->m_aMessages[] = "Deleting Parked Domain ($sDomain) from cPanel account succeeded.";
+			}
+			else {
+				$fSuccess = false;
+				$this->m_aMessages[] = "Deleting Parked Domain ($sDomain) from cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
+				$this->m_aMessages[] = "Stopping further processing due to previous failure.";
+			}
+	
+			if ( !$fSuccess ) {
+				break;
+			}
+		}
+	
+		return $fSuccess;
+		
+		
+	}
+	
+	
 	public function create_ftpusersbulk() {
 		
 		$aVars = array( 'ftp_new_user_bulk' );
@@ -135,51 +301,6 @@ class CPM_ActionDelegate_Domain extends CPM_ActionDelegate_Base {
 	}
 	
 	
-	/**
-	 * Will delete all databases from the cPanel account with names that correspond to elements
-	 * in the array that is populated in position 'databases_to_delete_names' in the main data array. 
-	 * 
-	 */
-	public function delete_subdomains() {
-		
-		$aVars = array();
-		
-		if ( !$this->preActionBasicValidate( $aVars, 'to delete Sub Domains' ) ) {
-			return false;
-		}
-		
-		if ( !isset( $this->m_aData['subdomains_to_delete_names'] ) || !is_array( $this->m_aData['subdomains_to_delete_names'] ) ) {
-			$this->m_aMessages[] = "No Sub Domains were selected.";
-			return false;
-		}
-		
-		$aSubDomains = $this->m_aData['subdomains_to_delete_names'];
-		
-		$fSuccess = true;
-		foreach( $aSubDomains as $sSubDomain ) {
-		
-			$aArgs = array ( 'domain' => $sSubDomain );
-
-			$this->m_oCpanel_Api->doApiFunction( "SubDomain", "delsubdomain", $aArgs );
-			$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
-			
-			if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
-				$fSuccess = true;
-				$this->m_aMessages[] = "Deleting Sub Domain ($sSubDomain) from cPanel account succeeded."; 
-			}
-			else {
-				$fSuccess = false;
-				$this->m_aMessages[] = "Deleting Sub Domain ($sSubDomain) from cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
-				$this->m_aMessages[] = "Stopping further processing due to previous failure.";
-			}
-			
-			if ( !$fSuccess ) {
-				break;
-			}
-		}
-		
-		return $fSuccess;
-	}
 	
 	public static function ValidateSubDomain( $insTestString, &$aMessages ) {
 	

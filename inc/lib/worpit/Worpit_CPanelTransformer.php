@@ -55,7 +55,7 @@ class Worpit_CPanelTransformer {
 	}
 
 	public static function GetLastSuccess( $inaApiResponse ) {
-		
+
 		if ( isset( $inaApiResponse['error'] ) ) {
 			return false;
 		}
@@ -76,6 +76,23 @@ class Worpit_CPanelTransformer {
 		} else {
 			return '';
 		}
+	}
+	
+	public static function GetPrimaryDomain( $inaApiResponse ) {
+		
+		$sPrimaryDomain = '';
+		
+		if ( !self::GetLastSuccess( $inaApiResponse ) ) {//Last API call failed.
+			return $sPrimaryDomain;
+		}
+	
+		$aData = self::GetDataArray( $inaApiResponse );
+		
+		if ( isset( $aData['result'] ) ) {
+			$sPrimaryDomain = $aData['result'];
+		}
+
+		return $sPrimaryDomain;
 	}
 	
 	/**
@@ -290,7 +307,7 @@ class Worpit_CPanelTransformer {
 	 * 
 	 * @param unknown_type $inaApiResponse
 	 */
-	public static function GetDataArray( $inaApiResponse, $insDataKey ) {
+	public static function GetDataArray( $inaApiResponse, $insDataKey = '' ) {
 		
 		$aData = array();
 		

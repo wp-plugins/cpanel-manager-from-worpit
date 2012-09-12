@@ -3,7 +3,7 @@
 Plugin Name: cPanel Manager (from Worpit)
 Plugin URI: http://worpit.com/
 Description: A tool to connect to your Web Hosting cPanel account from within your WordPress.
-Version: 1.4
+Version: 1.5
 Author: Worpit
 Author URI: http://worpit.com/
 */
@@ -48,7 +48,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	protected $m_fSubmitCpmMainAttempt;
 	
-	static public $VERSION			= '1.4'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
+	static public $VERSION			= '1.5'; //SHOULD BE UPDATED UPON EACH NEW RELEASE
 	
 	public function __construct(){
 		parent::__construct();

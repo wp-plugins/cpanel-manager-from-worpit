@@ -2,7 +2,7 @@
 
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_ftp.php' );
-include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subdomains.php' );
+include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subparkeddomains.php' );
 
 	$aConnectionData = array(
 			$worpit_cpanel_server_address,
@@ -80,6 +80,21 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subdomains.php' 
 				color: #fffffe;
 			}
 			
+			/* FTP: #9B440A; */
+			li#SubDomainsNav a {
+				color: #9B440A;
+			}
+			li#SubDomainsNav.active a {
+				color: #555;
+			}
+			#TabsFunctionSubdomains ul.nav-pills a {
+				color: #9B440A;
+			}
+			#TabsFunctionSubdomains ul.nav-pills li.active a {
+				background-color: #9B440A;
+				color: #fffffe;
+			}
+			
 			.user_homedir {
 				font-family: "Courier New";
 			}
@@ -88,14 +103,14 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subdomains.php' 
 			<ul id="TabsTopLevelMenu" class="nav nav-tabs">
 				<li id="MySqlNav" class="active"><a href="#MySqlTab" data-toggle="tab">MySQL</a></li>
 				<li id="FtpUsersNav"><a href="#FtpUsersTab" data-toggle="tab">FTP Users</a></li>
-				<li id="ParkedDomainsNav"><a href="#SubDomainsTab" data-toggle="tab">Sub Domains</a></li>
+				<li id="SubDomainsNav"><a href="#SubDomainsTab" data-toggle="tab">Sub / Parked<br/>Domains</a></li>
 				<li id="AddonDomainsNav"><a href="#AddonDomainsTab" data-toggle="tab">Addon Domains</a></li>
 				<li id="CronListNav"><a href="#CronListTab" data-toggle="tab">Cron Job List</a></li>
 			</ul>
 			<div id="TabsTopLevelContent" class="tab-content">
 				<div class="tab-pane active" id="MySqlTab"><?php echo getContent_MySqlTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="FtpUsersTab"><?php echo getContent_FtpTab( $aConnectionData, $oCpanelApi ); ?></div>
-				<div class="tab-pane fade in" id="SubDomainsTab"><?php echo getContent_SubdomainsTab( $aConnectionData, $oCpanelApi ); ?></div>
+				<div class="tab-pane fade in" id="SubDomainsTab"><?php echo getContent_SubDomainsTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="AddonDomainsTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Park', 'listaddondomains', 'domain', 'Addon Domains' ); ?></div>
 				<div class="tab-pane fade in" id="CronListTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Cron', 'listcron', 'command_htmlsafe', 'Cron Jobs' ); ?></div>
 			</div>

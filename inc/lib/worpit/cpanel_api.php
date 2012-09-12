@@ -41,6 +41,7 @@ class CPanel_Api {
 	public static $API1_FUNCTIONS = array(
 		'Fileman'	=> array( 'changeperm', 'fullbackup' ),
 		'Mysql'		=> array( 'adddb', 'adduser', 'adduserdb', 'deldb', 'deluser'),
+		'Park'		=> array( 'setredirecturl', 'getredirecturl', 'disableredirect' ),
 	);
 	
 	public static $API2_FUNCTIONS = array(
@@ -164,6 +165,7 @@ class CPanel_Api {
 		}
 		return $aData;
 	}
+
 	
 	public function getDocumentRoot() {
 		$this->m_aLastResponse = $this->m_oXmlApi->api2_query( $this->m_sUsername, "DomainLookup", "getdocroot" );
@@ -273,7 +275,7 @@ class CPanel_Api {
 	
 	public function getPrimaryDomain() {
 		$this->m_aLastResponse = $this->m_oXmlApi->api1_query( $this->m_sUsername, "print", "", array( '$CPDATA{\'DOMAIN\'}' ) );
-		return ( $this->m_aLastResponse['event']['result'] == 1 );
+		return $this->getLastResult();
 	}
 	
 	public function getStatsBar_stats( $infFull = true ) {

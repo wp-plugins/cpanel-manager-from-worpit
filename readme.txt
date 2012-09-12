@@ -4,7 +4,7 @@ Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
 Tested up to: 3.4
-Stable tag: 1.4
+Stable tag: 1.5
 
 == Description ==
 
@@ -105,12 +105,16 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 
 * Remove some hardcoding for Jump-links and from the cPanel API itself (server port)
 * Add domain name functions - addon/parked domains.
-* Allow Adding FTP users in bulk.
 * add cron job management
 * add file handling and file manager jump links
 * add ability to perform FULL cPanel backup and FTP offsite
 * add ability to perform cPanel backup of MySQL databases and FTP offsite
 * use ajax calls to load only necessary data to reduce API calls.
+
+= 1.5 =
+
+* ADDED: Parked Domain management - lists parked domains / add new parked domains / delete parked domains.
+* CHANGED: Combined the parked domains and the sub domains into 1 tab (fewer cPanel API calls)
 
 = 1.4 =
 

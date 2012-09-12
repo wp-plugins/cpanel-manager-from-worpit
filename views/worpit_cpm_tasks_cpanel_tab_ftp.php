@@ -50,9 +50,11 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 	$aMainFtpUser = Worpit_CPanelTransformer::GetData_MainFtpUser( $oLastResponse );
 	$sHomeDir = $aMainFtpUser['homedir'];
 	
+	$inoCpanelApi->getPrimaryDomain();
+	$sMainDomain = Worpit_CPanelTransformer::GetPrimaryDomain( $inoCpanelApi->getLastResponse() );
+	
 	$inoCpanelApi->doApiFunction( 'DomainLookup', 'getbasedomains' );
 	$oLastResponse = $inoCpanelApi->getLastResponse();
-	$sMainDomain = Worpit_CPanelTransformer::GetData_MainDomain( $oLastResponse );
 
 	?>
 		<legend>Create New FTP User</legend>
@@ -207,10 +209,10 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 	?>
 			<div id="TabsFunctionFtp" class="tabbable tabs-function">
 				<ul class="nav nav-pills">
-					<li class="active"><a href="#FtpInfo" data-toggle="tab">Info</a></li>
-					<li><a href="#FtpNewUser" data-toggle="tab">New FTP User</a></li>
-					<li><a href="#FtpNewUserBulk" data-toggle="tab">New FTP Users (Bulk)</a></li>
-					<li><a href="#FtpDeleteUser" data-toggle="tab">Delete FTP Users</a></li>
+					<li class="active"><a href="#FtpInfo" data-toggle="tab"><i class="icon icon-info-sign"></i></a></li>
+					<li><a href="#FtpNewUser" data-toggle="tab"><i class="icon icon-plus-sign"></i> FTP User</a></li>
+					<li><a href="#FtpNewUserBulk" data-toggle="tab"><i class="icon icon-plus-sign"></i> FTP Users (Bulk)</a></li>
+					<li><a href="#FtpDeleteUser" data-toggle="tab"><i class="icon icon-minus-sign"></i> FTP Users</a></li>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="FtpInfo"><?php echo $aHtml[ 'FtpInfo' ]; ?></div>
@@ -222,3 +224,4 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 	<?php
 	
 }//getContent_FtpTab
+
