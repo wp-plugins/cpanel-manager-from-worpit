@@ -15,25 +15,31 @@ Currently you can:
 
 = MySQL =
 
-*	View a list of all MySQL database and their attached users.
-*	Download any MySQL database in your cPanel account directly from this plugin.
-*	Add a new MySQL database and a new MySQL user to that database.
-*	Add a new MySQL user.
-*	Delete MySQL databases from your cPanel account IN BULK - take GREAT CARE.
-*	Delete MySQL users from your cPanel account IN BULK - take GREAT CARE.
+*	View a list of all MySQL database and their attached users
+*	Download any MySQL database in your cPanel account directly from this plugin
+*	Add a new MySQL database and a new MySQL user to that database
+*	Add a new MySQL user
+*	Delete MySQL databases from your cPanel account IN BULK - take GREAT CARE
+*	Delete MySQL users from your cPanel account IN BULK - take GREAT CARE
 
 = FTP =
 
-*	View a list of all FTP users.
+*	View a list of all FTP users
 *	Add a new FTP user
-*	Add new FTP users IN BULK.
+*	Add new FTP users IN BULK
 *	Delete FTP users IN BULK (with option to remove ftp directories)
 
 = Sub Domains =
 
 *	View all sub domains along with their full document root path and their redirection status
 *	Add a new sub domain
-*	Delete sub domains IN BULK.
+*	Delete sub domains IN BULK
+
+= Parked Domains =
+
+*	View all Parked Domains along with their full document root path and their redirection status
+*	Add a new Parked Domains
+*	Delete Parked Domains IN BULK
 
 With it (in time) you will be able to perform many convenient functions from within your WordPress site that
 you would otherwise need to log into your cPanel to do.
