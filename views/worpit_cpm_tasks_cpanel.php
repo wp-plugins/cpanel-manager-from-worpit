@@ -2,7 +2,7 @@
 
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_ftp.php' );
-include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subparkeddomains.php' );
+include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_domains.php' );
 
 	$aConnectionData = array(
 			$worpit_cpanel_server_address,
@@ -33,11 +33,9 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subparkeddomains
 			#TabsTopLevelContent > div > .well {
 				margin: 44px 20px;
 			}
-			
 			.tabs-function ul {
 				list-style-type: square;
 			}
-			
 			.tabs-function ul.nav-pills {
 				margin-bottom: 4px;
 				padding-left: 20px;
@@ -103,15 +101,13 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_subparkeddomains
 			<ul id="TabsTopLevelMenu" class="nav nav-tabs">
 				<li id="MySqlNav" class="active"><a href="#MySqlTab" data-toggle="tab">MySQL</a></li>
 				<li id="FtpUsersNav"><a href="#FtpUsersTab" data-toggle="tab">FTP Users</a></li>
-				<li id="SubDomainsNav"><a href="#SubDomainsTab" data-toggle="tab">Sub / Parked<br/>Domains</a></li>
-				<li id="AddonDomainsNav"><a href="#AddonDomainsTab" data-toggle="tab">Addon Domains</a></li>
+				<li id="SubDomainsNav"><a href="#SubDomainsTab" data-toggle="tab">Domains</a></li>
 				<li id="CronListNav"><a href="#CronListTab" data-toggle="tab">Cron Job List</a></li>
 			</ul>
 			<div id="TabsTopLevelContent" class="tab-content">
 				<div class="tab-pane active" id="MySqlTab"><?php echo getContent_MySqlTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="FtpUsersTab"><?php echo getContent_FtpTab( $aConnectionData, $oCpanelApi ); ?></div>
-				<div class="tab-pane fade in" id="SubDomainsTab"><?php echo getContent_SubDomainsTab( $aConnectionData, $oCpanelApi ); ?></div>
-				<div class="tab-pane fade in" id="AddonDomainsTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Park', 'listaddondomains', 'domain', 'Addon Domains' ); ?></div>
+				<div class="tab-pane fade in" id="SubDomainsTab"><?php echo getContent_DomainsTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="CronListTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Cron', 'listcron', 'command_htmlsafe', 'Cron Jobs' ); ?></div>
 			</div>
 		</div>
@@ -228,8 +224,9 @@ function getArrayAsList( $inaData ){
 function getConfirmBoxHtml() {
 
 	return '
+			<legend>Confirmation</legend>
 			<div class="control-group">
-				<label class="control-label" for="confirm_action">Type \'CONFIRM\' :</label>
+				<label class="control-label" for="confirm_action">Type \'CONFIRM\'</label>
 				<div class="controls">
 					<input type="text" id="confirm_action"" name="confirm_action" placeholder="Please confirm your intent" value="" />
 				</div>

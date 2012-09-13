@@ -4,7 +4,7 @@ Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
 Tested up to: 3.4
-Stable tag: 1.5
+Stable tag: 1.6
 
 == Description ==
 
@@ -38,8 +38,14 @@ Currently you can:
 = Parked Domains =
 
 *	View all Parked Domains along with their full document root path and their redirection status
-*	Add a new Parked Domains
+*	Add a new Parked Domain
 *	Delete Parked Domains IN BULK
+
+= Addon Domains =
+
+*	View all Addon Domains along with their full document root path and their redirection status
+*	Add a new Addon Domain and associated FTP user.
+*	Delete Addon Domains IN BULK
 
 With it (in time) you will be able to perform many convenient functions from within your WordPress site that
 you would otherwise need to log into your cPanel to do.
@@ -117,6 +123,10 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * add ability to perform cPanel backup of MySQL databases and FTP offsite
 * use ajax calls to load only necessary data to reduce API calls.
 
+= 1.6 =
+
+* ADDED: Addon Domain management - lists Addon domains / add new Addon domains / delete Addon domains.
+
 = 1.5 =
 
 * ADDED: Parked Domain management - lists parked domains / add new parked domains / delete parked domains.
@@ -148,6 +158,10 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * First Release.
 
 == Upgrade Notice ==
+
+= 1.6 =
+
+* ADDED: Addon Domain management - lists Addon domains / add new Addon domains / delete Addon domains.
 
 = 1.4 =
 

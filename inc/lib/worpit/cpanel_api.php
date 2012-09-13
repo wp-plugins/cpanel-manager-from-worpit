@@ -40,6 +40,7 @@ class CPanel_Api {
 	
 	public static $API1_FUNCTIONS = array(
 		'Fileman'	=> array( 'changeperm', 'fullbackup' ),
+		'Ftp'		=> array( 'getftpquota', 'get_welcomemsg', 'set_welcomemsg' ),
 		'Mysql'		=> array( 'adddb', 'adduser', 'adduserdb', 'deldb', 'deluser'),
 		'Park'		=> array( 'setredirecturl', 'getredirecturl', 'disableredirect' ),
 	);
@@ -47,9 +48,10 @@ class CPanel_Api {
 	public static $API2_FUNCTIONS = array(
 		'Cron'			=> array( 'listcron', 'add_line', 'remove_line', 'edit_line', 'get_email', 'set_email' ),
 		'Fileman'		=> array( 'fileop' ),
-		'Ftp'			=> array( 'addftp', 'listftp', 'ftpquota', 'passwdftp', 'delftp', 'getftpquota', 'get_welcomemsg', 'set_welcomemsg' ),
+		'Ftp'			=> array( 'addftp', 'delftp', 'listftp', 'listftpwithdisk', 'passwd', 'setquota' ),
 		'MysqlFE'		=> array( 'listdbs', 'listusers', 'listusersindb' ),
 		'DomainLookup'	=> array( 'getbasedomains', 'getdocroot', 'getdocroots', 'countbasedomains' ),
+		'AddonDomain'	=> array( 'deladdondomain', 'addaddondomain', 'listaddondomains' ),
 		'SubDomain'		=> array( 'listsubdomains', 'delsubdomain', 'addsubdomain' ),
 		'Park'			=> array( 'park', 'unpark', 'listparkeddomains', 'listaddondomains' ),
 		'StatsBar'		=> array( 'stat' ),
@@ -275,6 +277,10 @@ class CPanel_Api {
 	
 	public function getPrimaryDomain() {
 		$this->m_aLastResponse = $this->m_oXmlApi->api1_query( $this->m_sUsername, "print", "", array( '$CPDATA{\'DOMAIN\'}' ) );
+		return $this->getLastResult();
+	}
+	public function getHomeDirectory() {
+		$this->m_aLastResponse = $this->m_oXmlApi->api1_query( $this->m_sUsername, "print", "", array( '$homedir' ) );
 		return $this->getLastResult();
 	}
 	

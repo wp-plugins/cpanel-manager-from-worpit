@@ -48,7 +48,7 @@ class CPM_ActionDelegate_Domain extends CPM_ActionDelegate_Base {
 		$this->m_fGoodToGo = self::ValidateDirectory( $this->m_aData['subdomain_document_root'], $this->m_aMessages ) && $fValidState;
 		
 		if ( !$this->m_fGoodToGo ) {
-			$this->m_aMessages[] = $sErrorPrefix."Your inputs had problems. Please Check.";
+			$this->m_aMessages[] = "Your inputs had problems. Please Check.";
 			return false;
 		}
 		
@@ -61,7 +61,7 @@ class CPM_ActionDelegate_Domain extends CPM_ActionDelegate_Base {
 		
 		return $fSuccess;
 		
-	}//create_ftpuser
+	}//create_subdomain
 
 	public function createNewSubDomain( $insDomain, $insParentDomain, $insRootDir ) {
 		
@@ -253,6 +253,122 @@ class CPM_ActionDelegate_Domain extends CPM_ActionDelegate_Base {
 		
 	}
 	
+	public function create_addondomain() {
+		
+		$aVars = array( 'addondomain_new_domain', 'addondomain_subdomain_name', 'addondomain_ftp_password', 'addondomain_document_root' );
+		
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new Addon Domain' ) ) {
+			return false;
+		}
+		
+		$this->m_aData['addondomain_document_root'] = trim( $this->m_aData['addondomain_document_root'], '/' );
+		
+		$fValidState = true;
+		$fValidState = self::ValidateFullDomain( $this->m_aData['addondomain_new_domain'], $this->m_aMessages ) && $fValidState;
+		$fValidState = self::ValidateFtpUser( $this->m_aData['addondomain_subdomain_name'], $this->m_aMessages ) && $fValidState;
+		$this->m_fGoodToGo = self::ValidateDirectory( $this->m_aData['addondomain_document_root'], $this->m_aMessages ) && $fValidState;
+		
+		if ( empty( $this->m_aData['addondomain_ftp_password'] ) ) {
+			$fCreateFtpUser = false;
+		}
+		else {
+			$fCreateFtpUser = true;
+			$fValidState = self::ValidateUserPassword( $this->m_aData['addondomain_ftp_password'], $this->m_aMessages ) && $fValidState;
+		}
+		
+		if ( !$this->m_fGoodToGo ) {
+			$this->m_aMessages[] = "Your inputs had problems. Please Check.";
+			return false;
+		}
+		
+		$fSuccess = $this->createNewAddonDomain( $this->m_aData['addondomain_new_domain'], $this->m_aData['addondomain_document_root'], $this->m_aData['addondomain_subdomain_name'] );
+		
+		if ( $fCreateFtpUser && !$fSuccess ) {
+			$this->m_aMessages[] = "No attempt was made to create the new FTP user because of the previous error.";
+		}
+		else if ( $fCreateFtpUser ) {
+			
+			//Create new FTP USER.
+			$fSuccess = $this->createNewFtpUser( $this->m_aData['addondomain_subdomain_name'], $this->m_aData['addondomain_ftp_password'], 0, $this->m_aData['addondomain_document_root'] );
+		}
+		
+		return $fSuccess;
+		
+	}//create_addondomain
+	
+	public function createNewAddonDomain( $insDomain, $insRootDir, $insSubDomain ) {
+		
+		$aArgs = array(
+					'newdomain'	=>	$insDomain,
+					'dir'		=>	$insRootDir,
+					'subdomain'	=>	$insSubDomain,
+		);
+		
+		$this->m_oCpanel_Api->doApiFunction( "AddonDomain", "addaddondomain", $aArgs );
+		$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+		
+		$fSuccess = false;
+		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+			$fSuccess = true;
+			$this->m_aMessages[] = "Adding new Addon Domain ($insDomain) succeeded."; 
+		}
+		else {
+			$this->m_aMessages[] = "Adding new Addon Domain ($insDomain) FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse ); 
+		}
+		
+		return $fSuccess;
+	}
+	
+	public function delete_addondomains() {
+	
+		$aVars = array();
+	
+		if ( !$this->preActionBasicValidate( $aVars, 'to delete Addon Domains' ) ) {
+			return false;
+		}
+	
+		if ( !isset( $this->m_aData['addondomains_to_delete_names'] ) || !is_array( $this->m_aData['addondomains_to_delete_names'] ) ) {
+			$this->m_aMessages[] = "No Addon Domains were selected.";
+			return false;
+		}
+	
+		$aAddonDomains = $this->m_aData['addondomains_to_delete_names'];
+	
+		$fSuccess = true;
+		foreach( $aAddonDomains as $sDomain ) {
+			
+			$aAddonDomainParts = explode( '_', $sDomain, 2 );
+			
+			if ( count( $aAddonDomainParts ) != 2 ) {
+				$this->m_aMessages[] = "Unexpected data to do addon domain delete: $sDomain";
+				$fSuccess = false;
+				break;
+			}
+			
+			list ( $sAddonDomainName, $sSubDomainPart ) = $aAddonDomainParts;
+			
+			$aArgs = array ( 'domain' => $sAddonDomainName, 'subdomain' => $sSubDomainPart, );
+
+			$this->m_oCpanel_Api->doApiFunction( "AddonDomain", "deladdondomain", $aArgs );
+			$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+	
+			if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+				$this->m_aMessages[] = "Deleting Addon Domain ($sAddonDomainName) and associated data succeeded.";
+			}
+			else {
+				$fSuccess = false;
+				$this->m_aMessages[] = "Deleting Addon Domain ($sAddonDomainName) FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
+				$this->m_aMessages[] = "Stopping further processing due to previous failure.";
+			}
+	
+			if ( !$fSuccess ) {
+				break;
+			}
+		}
+	
+		return $fSuccess;
+		
+	}
 	
 	public function create_ftpusersbulk() {
 		

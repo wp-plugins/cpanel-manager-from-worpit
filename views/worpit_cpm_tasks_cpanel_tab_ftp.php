@@ -7,27 +7,30 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 	list($sServerAddress, $sServerPort, $sUsername, $sPassword, $sNonce, $sFormAction ) = $inaConnectionData;
 	
 	//Perform Main cPanel FTP API query
-	$inoCpanelApi->doApiFunction( 'Ftp', 'listftp' );
+	$inoCpanelApi->doApiFunction( 'Ftp', 'listftpwithdisk' );
 	$oLastResponse = $inoCpanelApi->getLastResponse();
 
 	if ( Worpit_CPanelTransformer::GetLastSuccess($oLastResponse) ) { //Last API call was a success.
 		
-		$aAllFtpUserData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'user' );
+		$aAllFtpUserData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'login' );
 
 		if ( !empty($aAllFtpUserData) ) {
 
 			$sHtml = '<div class="well">
 			<h4>FTP Users and their Home Directories</h4>';
 			foreach( $aAllFtpUserData as $aFtpUser ) {
-				$sHomeDir = $aFtpUser[ 'homedir' ];
-				$sUserType = $aFtpUser[ 'type' ];
-				$sUserName = $aFtpUser[ 'user' ];
+				$sHomeDir = $aFtpUser[ 'dir' ];
+				$sUserType = $aFtpUser[ 'accttype' ];
+				$sUserName = $aFtpUser[ 'login' ];
+				$sDiskUsed = $aFtpUser[ 'diskused' ];
+				$sDiskQuota = $aFtpUser[ 'diskquota' ];
 				
 				$sHtml .= "<h5>$sUserName</h5>";
 				$sHtml .= "
 					<ul>
-						<li><span class=\"user_homedir\">$sHomeDir</span></li>
+						<li>Home Directory: <span class=\"user_homedir\">$sHomeDir</span></li>
 						<li>Type: $sUserType</li>
+						<li>Disk Quota Used: $sDiskUsed MB / $sDiskQuota</li>
 					</ul>
 				";
 				
@@ -47,8 +50,9 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 	 */
 	ob_start();
 	
-	$aMainFtpUser = Worpit_CPanelTransformer::GetData_MainFtpUser( $oLastResponse );
-	$sHomeDir = $aMainFtpUser['homedir'];
+	$inoCpanelApi->getHomeDirectory();
+	$sData = Worpit_CPanelTransformer::GetDataArray( $inoCpanelApi->getLastResponse() );
+	$sHomeDir = $sData['result'];
 	
 	$inoCpanelApi->getPrimaryDomain();
 	$sMainDomain = Worpit_CPanelTransformer::GetPrimaryDomain( $inoCpanelApi->getLastResponse() );
@@ -221,6 +225,14 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 					<div class="tab-pane" id="FtpDeleteUser"><?php echo $aHtml[ 'FtpDeleteUser' ]; ?></div>
 				</div>
 			</div>
+		
+		<script>
+			jQuery("#ftp_new_user").change(function() {
+				if ( this.value ) {
+					jQuery("#ftp_new_user_homedir").val( this.value );
+				}
+			});
+		</script>
 	<?php
 	
 }//getContent_FtpTab

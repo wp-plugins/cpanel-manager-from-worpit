@@ -1,6 +1,6 @@
 <?php
 
-function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
+function getContent_DomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 	
 	$aHtml = array();
 	$sHtml = '';
@@ -13,12 +13,14 @@ function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 	$aAllSubDomainData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'subdomain' );
 	$aAllSubDomainsList = Worpit_CPanelTransformer::GetListFromData( $oLastResponse, 'domain' );
 
-	$sHtml = '<h4>All Sub Domains</h4>';
+	$sHtml = '
+		<h4>All Sub Domains</h4>
+		<div class="well">
+	';
 	
 	if ( !empty($aAllSubDomainData) ) {
 
-		$sHtml .= '<div class="well">
-		<ul>';
+		$sHtml .= '<ul>';
 		foreach( $aAllSubDomainData as $aSubDomain ) {
 			$sSubDomain = $aSubDomain[ 'subdomain' ];
 			$sRootDomain = $aSubDomain[ 'rootdomain' ];
@@ -33,12 +35,12 @@ function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 			";
 			
 		}
-		$sHtml .= '</ul></div>';
-
-
-	} else {
+		$sHtml .= '</ul>';
+	}
+	else {
 		$sHtml .= "There doesn't appear to be any.";
 	}
+	$sHtml .= '</div>';
 	
 	$inoCpanelApi->doApiFunction( 'Park', 'listparkeddomains' );
 	$oLastResponse = $inoCpanelApi->getLastResponse();
@@ -46,11 +48,14 @@ function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 	$aAllParkedDomainsData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'domain' );
 	$aAllParkedDomainsList = Worpit_CPanelTransformer::GetListFromData( $oLastResponse, 'domain' );
 	
-	$sHtml .= '<h4>All Parked Domains</h4>';
+	$sHtml .= '
+		<h4>All Parked Domains</h4>
+		<div class="well">
+	';
+	
 	if ( !empty($aAllParkedDomainsData) ) {
 
-		$sHtml .= '<div class="well">
-		<ul>';
+		$sHtml .= '<ul>';
 		foreach( $aAllParkedDomainsData as $aDomain ) {
 			$sDomain = $aDomain[ 'domain' ];
 			$sRootDir = $aDomain[ 'dir' ];
@@ -64,14 +69,53 @@ function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 			";
 			
 		}
-		$sHtml .= '</ul></div>';
+		$sHtml .= '</ul>';
 
 
 	} else {
 		$sHtml .= "There doesn't appear to be any Parked Domains.";
 	}
+	$sHtml .= '</div>';
+
+	//Perform Main cPanel Addon Domains API query
+	$inoCpanelApi->doApiFunction( 'AddonDomain', 'listaddondomains' );
+	$oLastResponse = $inoCpanelApi->getLastResponse();
+
+	$aAllAddonDomainsData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'domain' );
+	$aAllAddonDomainsList = Worpit_CPanelTransformer::GetListFromData( $oLastResponse, 'domain' );
+
+	$sHtml .= '
+		<h4>All Addon Domains</h4>
+		<div class="well">
+	';
+	
+	if ( !empty($aAllAddonDomainsData) ) {
+
+		$sHtml .= '<ul>';
+		foreach( $aAllAddonDomainsData as $aAddonDomain ) {
+			$sAddonDomain = $aAddonDomain[ 'domain' ];
+			$sSubDomain = $aAddonDomain[ 'subdomain' ];
+			$sRootDir = $aAddonDomain[ 'dir' ];
+			$sStatus = $aAddonDomain[ 'status' ];
+			$sHtml .= "<h5>$sAddonDomain</h5>";
+			$sHtml .= "
+				<ul>
+					<li><span class=\"user_homedir\">$sRootDir</span></li>
+					<li>Sub Domain: $sSubDomain</li>
+					<li>Redirection Status: $sStatus</li>
+				</ul>
+			";
+			
+		}
+		$sHtml .= '</ul>';
+
+
+	} else {
+		$sHtml .= "There doesn't appear to be any Addon Domains";
+	}
+	$sHtml .= '</div>';
 		
-	$aHtml[ 'SubDomainsInfo' ] = $sHtml;
+	$aHtml[ 'DomainsInfo' ] = $sHtml;
 	
 	/*
 	 * Create HTML for Tab: SubDomainsNew
@@ -177,7 +221,6 @@ function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 	$oLastResponse = $inoCpanelApi->getLastResponse();
 	
 	$aAllDomainData = Worpit_CPanelTransformer::GetDataArray( $oLastResponse, 'domain' );
-	
 	$aAllParkedDomainsList = Worpit_CPanelTransformer::GetListFromData( $oLastResponse, 'domain' );
 	/*
 	 * Create HTML for Tab: ParkedDomainsNew
@@ -279,23 +322,150 @@ function getContent_SubDomainsTab( $inaConnectionData, &$inoCpanelApi ) {
 	$aHtml[ 'ParkedDomainsDelete' ] = ob_get_contents();
 	ob_end_clean();
 	
+	/*
+	 * Create HTML for Tab: AddonDomainsNew
+	 */
+	ob_start();
+	?>
+		<legend>Create New Addon Domain</legend>
+		<form class="form-horizontal" action="<?php echo $sFormAction; ?>" method="post" >
+			<?php wp_nonce_field( $sNonce ); ?>
+			<div class="control-group">
+				<label class="control-label" for="addondomain_new_domain">New Addon Domain</label>
+				<div class="controls">
+					<input type="text" name="addondomain_new_domain" id="addondomain_new_domain" placeholder="Addon Domain Name" class="span3"
+					value="<?php echo isset($_POST['addondomain_new_domain'])? $_POST['addondomain_new_domain'] : '' ?>" />
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="addondomain_document_root">Document Root</label>
+				<div class="controls">
+					<div class="input-prepend">
+						<span class="add-on"><?php echo $sHomeDir.'/'; ?></span><input type="text" name="addondomain_document_root" id="addondomain_document_root"
+						placeholder="Document Root Directory" class="span3"
+						value="<?php echo isset($_POST['addondomain_document_root'])? $_POST['addondomain_document_root'] : '' ?>" />
+					</div>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="addondomain_subdomain_name">Sub Domain/FTP name</label>
+				<div class="controls">
+					<input type="text" name="addondomain_subdomain_name" id="addondomain_subdomain_name" placeholder="Sub Domain" class="span3"
+					value="<?php echo isset($_POST['addondomain_subdomain_name'])? $_POST['addondomain_subdomain_name'] : '' ?>" />
+				</div>
+			</div>
+
+			<legend>Create Optional FTP User</legend>
+			<p>You can create an optional FTP User by supplying a password below. If you leave the field empty, NO FTP user will be created.</p>
+			<div class="control-group">
+				<label class="control-label" for="addondomain_ftp_password">FTP User Password</label>
+				<div class="controls">
+					<input type="text" name="addondomain_ftp_password" id="addondomain_ftp_password" placeholder="User Password" class="span3"
+					value="<?php echo isset($_POST['addondomain_ftp_password'])? $_POST['addondomain_ftp_password'] : '' ?>" />
+				</div>
+			</div>
+			<?php echo getConfirmBoxHtml(); ?>
+			<div class="form-actions">
+				<input type="hidden" name="cpm_submit_action" value="domain_create_addondomain" />
+				<input type="hidden" name="cpm_form_submit" value="1" />
+			 	<button type="submit" class="btn btn-primary" onClick="return confirmSubmit('Are you sure you want to create the new Addon Domain?')">Create New Addon Domain</button>
+			</div>
+		</form>
+		
+	<?php
+	$aHtml[ 'AddonDomainsNew' ] = ob_get_contents();
+	ob_end_clean();
+	
+	/*
+	 * Create HTML for Tab: AddonDomainsDelete
+	 */
+	ob_start();
+	?>
+		<legend>Delete Addon Domains</legend>
+		<form class="form-horizontal" action="<?php echo $sFormAction; ?>" method="post" >
+			<?php wp_nonce_field( $sNonce ); ?>
+			
+			<?php
+
+			if ( !empty($aAllAddonDomainsList) ) {
+			?>
+				<div class="control-group">
+					<label class="control-label" for="addondomains_to_delete_names">Choose Addon Domains</label>
+					<div class="controls">
+						<select class="span5" multiple="multiple" size="<?php echo count($aAllAddonDomainsList) ?>" name="addondomains_to_delete_names[]" id="addondomains_to_delete_names">
+			<?php
+				foreach( $aAllAddonDomainsData as $aAddonDomainData ) {
+					$sAddonDomain = $aAddonDomainData['domain'];
+					$sValue = $sAddonDomain.'_'.$aAddonDomainData['subdomain'].'_'.$aAddonDomainData['rootdomain'];
+					echo '<option name="'.$sAddonDomain.'" value="'.$sValue.'">'.$sAddonDomain.'</option>';
+				}
+			?>
+						</select>
+					</div>
+				</div>
+				<?php echo getConfirmBoxHtml(); ?>
+				<div class="form-actions">
+					<input type="hidden" name="cpm_submit_action" value="domain_delete_addondomains" />
+					<input type="hidden" name="cpm_form_submit" value="1" />
+				 	<button type="submit" class="btn btn-primary btn-danger" onClick="return confirmSubmit('Are you sure you want to delete the selected Addon Domain(s)?')">Delete Addon Domain(s)</button>
+				</div>
+			<?php
+			}
+			else {
+				echo "<p>There doesn't appear to be any Addon Domains on this cPanel account available for deletion.</p>";
+			}
+			?>
+		</form>
+		
+	<?php
+	$aHtml[ 'AddonDomainsDelete' ] = ob_get_contents();
+	ob_end_clean();
+	
 	?>
 			<div id="TabsFunctionSubdomains" class="tabbable tabs-function">
 				<ul class="nav nav-pills">
-					<li class="active"><a href="#SubDomainsInfo" data-toggle="tab"><i class="icon icon-info-sign"></i></a></li>
-					<li><a href="#SubDomainsNew" data-toggle="tab"><i class="icon icon-plus-sign"></i> Sub Domain</a></li>
-					<li><a href="#SubDomainsDelete" data-toggle="tab"><i class="icon icon-minus-sign"></i> Sub Domains</a></li>
-					<li><a href="#ParkedDomainsNew" data-toggle="tab"><i class="icon icon-plus-sign"></i> Parked Domain</a></li>
-					<li><a href="#ParkedDomainsDelete" data-toggle="tab"><i class="icon icon-minus-sign"></i> Parked Domains</a></li>
+					<li class="active"><a href="#DomainsInfo" data-toggle="tab"><i class="icon icon-info-sign"></i></a></li>
+					<li><a href="#SubDomainsNew" data-toggle="tab"><i class="icon icon-plus-sign"></i> Sub</a></li>
+					<li><a href="#SubDomainsDelete" data-toggle="tab"><i class="icon icon-minus-sign"></i> Sub</a></li>
+					<li><a href="#ParkedDomainsNew" data-toggle="tab"><i class="icon icon-plus-sign"></i> Parked</a></li>
+					<li><a href="#ParkedDomainsDelete" data-toggle="tab"><i class="icon icon-minus-sign"></i> Parked</a></li>
+					<li><a href="#AddonDomainsNew" data-toggle="tab"><i class="icon icon-plus-sign"></i> Addon</a></li>
+					<li><a href="#AddonDomainsDelete" data-toggle="tab"><i class="icon icon-minus-sign"></i> Addon</a></li>
 				</ul>
 				<div class="tab-content">
-					<div class="tab-pane active" id="SubDomainsInfo"><?php echo $aHtml[ 'SubDomainsInfo' ]; ?></div>
+					<div class="tab-pane active" id="DomainsInfo"><?php echo $aHtml[ 'DomainsInfo' ]; ?></div>
 					<div class="tab-pane" id="SubDomainsNew"><?php echo $aHtml[ 'SubDomainsNew' ]; ?></div>
 					<div class="tab-pane" id="SubDomainsDelete"><?php echo $aHtml[ 'SubDomainsDelete' ]; ?></div>
 					<div class="tab-pane" id="ParkedDomainsNew"><?php echo $aHtml[ 'ParkedDomainsNew' ]; ?></div>
 					<div class="tab-pane" id="ParkedDomainsDelete"><?php echo $aHtml[ 'ParkedDomainsDelete' ]; ?></div>
+					<div class="tab-pane" id="AddonDomainsNew"><?php echo $aHtml[ 'AddonDomainsNew' ]; ?></div>
+					<div class="tab-pane" id="AddonDomainsDelete"><?php echo $aHtml[ 'AddonDomainsDelete' ]; ?></div>
 				</div>
 			</div>
+			<script>
+				jQuery("#subdomain_new_domain").change(function() {
+		
+					if ( this.value ) {
+						jQuery("#subdomain_document_root").val( this.value );
+					}
+				});
+				
+				jQuery("#addondomain_new_domain").change(function() {
+					
+					if ( this.value ) {
+						
+						var iDotPosition = this.value.search(/\./);
+					
+						if ( iDotPosition != -1 ) {
+							
+							var sNewVal = this.value.substring(0, iDotPosition);
+		
+							jQuery("#addondomain_subdomain_name").val( sNewVal );
+							jQuery("#addondomain_document_root").val( sNewVal );
+						}
+					}
+				});
+			</script>
 	<?php
 	
 }//getContent_SubDomainsTab

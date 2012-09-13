@@ -133,6 +133,40 @@ class CPM_ActionDelegate_Base {
 		return true;
 	}//preActionBasicValidate
 	
+	public function createNewFtpUser( $insUsername, $insPassword, $insQuota, $insHomedir ) {
+	
+		$aVars = array();
+	
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new FTP User' ) ) {
+			return false;
+		}
+	
+		$aArgs = array(
+				'user'		=> $insUsername,
+				'pass'		=> $insPassword,
+				'quota'		=> intval($insQuota),
+				'homedir'	=> $insHomedir
+		);
+	
+		$this->m_oCpanel_Api->doApiFunction( "Ftp", "addftp", $aArgs );
+		$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+	
+		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+			$fSuccess = true;
+			$this->m_aMessages[] = "Creating new FTP User succeeded: ".$insUsername.' | '.$insPassword.' | '.$insQuota.' | '.$insHomedir;
+		}
+		else {
+			$fSuccess = false;
+			$this->m_aMessages[] = "Creating new FTP User ( $insUsername | $insPassword | $insQuota | $insHomedir ) on cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
+		}
+	
+		return $fSuccess;
+	
+	}//createNewFtpUser
+	
+	
+	
+	
 	public static function ValidateDatabaseName( $insDatabaseName, &$aMessages ) {
 		
 		$fValidState = true;
