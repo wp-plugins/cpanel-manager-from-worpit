@@ -24,7 +24,7 @@
 include_once( dirname(__FILE__).'/../../inc/lib/worpit/Worpit_CPanelTransformer.php' );
 include_once( dirname(__FILE__).'/CPM_ActionDelegate_Base.php' );
 
-class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
+class CPM_ActionDelegate_Email extends CPM_ActionDelegate_Base {
 		
 	/**
 	 * Assuming inputs are valid, will create a new database and new database user and assign the user will full
@@ -32,19 +32,18 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 	 * 
 	 * $this->m_aData must contain database_name, database_user, database_user_password
 	 */
-	public function create_ftpuser() {
+	public function create_emailuser() {
 		
-		$aVars = array( 'ftp_new_user', 'ftp_new_user_password', 'ftp_new_user_quota', 'ftp_new_user_homedir' );
+		$aVars = array( 'email_new_user', 'email_new_user_password', 'email_new_user_domain', 'email_new_user_quota' );
 		
-		if ( !$this->preActionBasicValidate( $aVars, 'create a new FTP user' ) ) {
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new Email user' ) ) {
 			return false;
 		}
 		
 		$fValidState = true;
-		$fValidState = self::ValidateFtpUser( $this->m_aData['ftp_new_user'], $this->m_aMessages ) && $fValidState;
-		$fValidState = self::ValidateUserPassword( $this->m_aData['ftp_new_user_password'], $this->m_aMessages ) && $fValidState;
-		$fValidState = self::ValidateQuota( $this->m_aData['ftp_new_user_quota'], $this->m_aMessages ) && $fValidState;
-		$this->m_fGoodToGo = self::ValidateDirectory( $this->m_aData['ftp_new_user_homedir'], $this->m_aMessages ) && $fValidState;
+		$fValidState = self::IsValidEmailPart( $this->m_aData['email_new_user'], $this->m_aMessages ) && $fValidState;
+		$fValidState = self::ValidateUserPassword( $this->m_aData['email_new_user_password'], $this->m_aMessages ) && $fValidState;
+		$this->m_fGoodToGo = self::ValidateQuota( $this->m_aData['email_new_user_quota'], $this->m_aMessages ) && $fValidState;
 		
 		if ( !$this->m_fGoodToGo ) {
 			$this->m_aMessages[] = $sErrorPrefix."Your inputs had problems. Please Check.";
@@ -53,51 +52,51 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 		
 		$fSuccess = false;
 		
-		$fSuccess = $this->createNewFtpUser(
-						$this->m_aData['ftp_new_user'],
-						$this->m_aData['ftp_new_user_password'],
-						$this->m_aData['ftp_new_user_quota'],
-						$this->m_aData['ftp_new_user_homedir'] );
+		$fSuccess = $this->createNewEmailUser(
+						$this->m_aData['email_new_user'],
+						$this->m_aData['email_new_user_password'],
+						$this->m_aData['email_new_user_domain'],
+						$this->m_aData['email_new_user_quota'] );
 		
 		return $fSuccess;
 		
-	}//create_ftpuser
+	}//create_emailuser
 	
-	public function create_ftpusersbulk() {
+	public function create_emailusersbulk() {
 		
-		$aVars = array( 'ftp_new_user_bulk' );
+		$aVars = array( 'email_new_user_bulk' );
 		
-		if ( !$this->preActionBasicValidate( $aVars, 'create new FTP users' ) ) {
+		if ( !$this->preActionBasicValidate( $aVars, 'create new Email users' ) ) {
 			return false;
 		}
 		
-		if ( !isset($this->m_aData['ftp_new_user_bulk']) || empty($this->m_aData['ftp_new_user_bulk']) ) {
-			$this->m_aMessages[] = "No new FTP User details were provided.";
+		if ( !isset($this->m_aData['email_new_user_bulk']) || empty($this->m_aData['email_new_user_bulk']) ) {
+			$this->m_aMessages[] = "No new Email User details were provided.";
 			return false;
 		}
 		
 		$fValidState = true;
 		$aAllNewUsers = array();
-		$fValidState = self::ValidateFtpUsersBulk( $this->m_aData['ftp_new_user_bulk'], $aAllNewUsers, $this->m_aMessages ) && $fValidState;
+		$fValidState = self::ValidateEmailUsersBulk( $this->m_aData['email_new_user_bulk'], $aAllNewUsers, $this->m_aMessages ) && $fValidState;
 
 		if ( $fValidState && !empty($aAllNewUsers) ) {
 			
-			$sBaseHomedir = trim( $this->m_aData['ftp_new_user_bulk_homedir'], '/' );
+			$sBaseHomedir = trim( $this->m_aData['email_new_user_bulk_homedir'], '/' );
 			if ( !empty($sBaseHomedir) ) {
 				$sBaseHomedir .= '/';
 			}
 			
-			foreach ( $aAllNewUsers as $sNewFtpUser ) {
+			foreach ( $aAllNewUsers as $sNewEmailUser ) {
 				
-				$aNewFtpUserDetails = explode( ',', $sNewFtpUser );
-				list( $sUsername, $sPassword, $sQuota ) = $aNewFtpUserDetails;
+				$aNewEmailUserDetails = explode( ',', $sNewEmailUser );
+				list( $sUsername, $sPassword, $sQuota ) = $aNewEmailUserDetails;
 				
-				$this->m_aData['ftp_new_user'] = $sUsername;
-				$this->m_aData['ftp_new_user_password'] = $sPassword;
-				$this->m_aData['ftp_new_user_quota'] = $sQuota;
-				$this->m_aData['ftp_new_user_homedir'] = $sBaseHomedir . $sUsername;
+				$this->m_aData['email_new_user'] = $sUsername;
+				$this->m_aData['email_new_user_password'] = $sPassword;
+				$this->m_aData['email_new_user_quota'] = $sQuota;
+				$this->m_aData['email_new_user_homedir'] = $sBaseHomedir . $sUsername;
 				
-				$fValidState = $this->create_ftpuser();
+				$fValidState = $this->create_emailuser();
 				
 				if (!$fValidState) {
 					break;
@@ -108,44 +107,42 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 		
 		return $fValidState;
 	}
+	
 	/**
 	 * Will delete all databases from the cPanel account with names that correspond to elements
-	 * in the array that is populated in position 'databases_to_delete_names' in the main data array. 
-	 * 
+	 * in the array that is populated in position 'databases_to_delete_names' in the main data array.
 	 */
-	public function delete_ftpusers() {
+	public function delete_emailusers() {
 		
 		$aVars = array();
 		
-		if ( !$this->preActionBasicValidate( $aVars, 'to delete FTP users' ) ) {
+		if ( !$this->preActionBasicValidate( $aVars, 'to delete Email users' ) ) {
 			return false;
 		}
 		
-		if ( !isset( $this->m_aData['users_to_delete_names'] ) || !is_array( $this->m_aData['users_to_delete_names'] ) ) {
-			$this->m_aMessages[] = "No FTP users were selected.";
+		if ( !isset( $this->m_aData['email_users_to_delete_names'] ) || !is_array( $this->m_aData['email_users_to_delete_names'] ) ) {
+			$this->m_aMessages[] = "No Email users were selected.";
 			return false;
 		}
 		
-		$aUserNames = $this->m_aData['users_to_delete_names'];
+		$aEmails = $this->m_aData['email_users_to_delete_names'];
 		
 		$fSuccess = true;
-		foreach( $aUserNames as $sUserName ) {
-		
-			$aArgs = array (
-					'user' => $sUserName,
-					'destroy' => ( ( isset($this->m_aData['ftp_delete_users_disk']) )? 1 : 0 ),
-					);
+		foreach( $aEmails as $sFullEmail ) {
 			
-			$this->m_oCpanel_Api->doApiFunction( "Ftp", "delftp", $aArgs );
+			$aArgs = array ();
+			list( $aArgs['email'], $aArgs['domain'] ) = explode( '@', $sFullEmail );
+			
+			$this->m_oCpanel_Api->doApiFunction( "Email", "delpop", $aArgs );
 			$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
 			
 			if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
 				$fSuccess = true;
-				$this->m_aMessages[] = "Deleting FTP user from cPanel account succeeded: ".$sUserName; 
+				$this->m_aMessages[] = "Deleting Email user from cPanel account succeeded: ".$sFullEmail; 
 			}
 			else {
 				$fSuccess = false;
-				$this->m_aMessages[] = "Deleting FTP user from cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
+				$this->m_aMessages[] = "Deleting Email user from cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
 				$this->m_aMessages[] = "Stopping further processing due to previous failure.";
 			}
 			
@@ -157,12 +154,12 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 		return $fSuccess;
 	}
 	
-	public static function ValidateFtpUsersBulk( $insFtpUserDataBulk, &$inaAllNewUsers, &$inaMessages ) {
+	public static function ValidateEmailUsersBulk( $insEmailUserDataBulk, &$inaAllNewUsers, &$inaMessages ) {
 		
 		$fValidState = true;
-		if ( !empty( $insFtpUserDataBulk ) ) {
+		if ( !empty( $insEmailUserDataBulk ) ) {
 			
-			$inaAllNewUsers = explode( "\n", $insFtpUserDataBulk );
+			$inaAllNewUsers = explode( "\n", $insEmailUserDataBulk );
 
 			$iCount = -1;
 			foreach( $inaAllNewUsers as $sNewUserLine ) {
@@ -170,7 +167,7 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 				$iCount++;
 				
 				//Remove Empty lines from array to process
-				$sNewUserLine = self::CleanupFtpUserBulkString( $sNewUserLine );
+				$sNewUserLine = self::CleanupEmailUserBulkString( $sNewUserLine );
 				if ( empty($sNewUserLine) ) {
 					unset( $inaAllNewUsers[$iCount] );
 					continue;
@@ -187,18 +184,18 @@ class CPM_ActionDelegate_Ftp extends CPM_ActionDelegate_Base {
 			}
 		}
 		else {
-			$inaMessages[] = "The new FTP User data is blank.";
+			$inaMessages[] = "The new Email User data is blank.";
 			$fValidState = false;
 		}
 		
 		return $fValidState;
 	}
 	
-	protected static function CleanupFtpUserBulkString( $insUserString ) {
+	protected static function CleanupEmailUserBulkString( $insUserString ) {
 		
 		$insUserString = preg_replace( '/\s+/', '', $insUserString);
 		return $insUserString;
 	}
 	
 	
-}//CPM_ActionDelegate_Ftp
+}//CPM_ActionDelegate_Email

@@ -2,6 +2,7 @@
 
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_mysql.php' );
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_ftp.php' );
+include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_email.php' );
 include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_domains.php' );
 
 	$aConnectionData = array(
@@ -78,7 +79,7 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_domains.php' );
 				color: #fffffe;
 			}
 			
-			/* FTP: #9B440A; */
+			/* SubDomains: #9B440A; */
 			li#SubDomainsNav a {
 				color: #9B440A;
 			}
@@ -93,6 +94,21 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_domains.php' );
 				color: #fffffe;
 			}
 			
+			/* Email: #CC008B; */
+			li#EmailNav a {
+				color: #CC008B;
+			}
+			li#EmailNav.active a {
+				color: #555;
+			}
+			#TabsFunctionEmail ul.nav-pills a {
+				color: #CC008B;
+			}
+			#TabsFunctionEmail ul.nav-pills li.active a {
+				background-color: #CC008B;
+				color: #fffffe;
+			}
+			
 			.user_homedir {
 				font-family: "Courier New";
 			}
@@ -101,16 +117,19 @@ include_once( dirname(__FILE__).DS.'worpit_cpm_tasks_cpanel_tab_domains.php' );
 			<ul id="TabsTopLevelMenu" class="nav nav-tabs">
 				<li id="MySqlNav" class="active"><a href="#MySqlTab" data-toggle="tab">MySQL</a></li>
 				<li id="FtpUsersNav"><a href="#FtpUsersTab" data-toggle="tab">FTP Users</a></li>
+				<li id="EmailNav"><a href="#EmailTab" data-toggle="tab">Email</a></li>
 				<li id="SubDomainsNav"><a href="#SubDomainsTab" data-toggle="tab">Domains</a></li>
 				<li id="CronListNav"><a href="#CronListTab" data-toggle="tab">Cron Job List</a></li>
 			</ul>
 			<div id="TabsTopLevelContent" class="tab-content">
 				<div class="tab-pane active" id="MySqlTab"><?php echo getContent_MySqlTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="FtpUsersTab"><?php echo getContent_FtpTab( $aConnectionData, $oCpanelApi ); ?></div>
+				<div class="tab-pane fade in" id="EmailTab"><?php echo getContent_EmailTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="SubDomainsTab"><?php echo getContent_DomainsTab( $aConnectionData, $oCpanelApi ); ?></div>
 				<div class="tab-pane fade in" id="CronListTab">Coming Soon...<?php //echo getCpanelInfoHtml( $aConnectionData, $oCpanelApi, 'Cron', 'listcron', 'command_htmlsafe', 'Cron Jobs' ); ?></div>
 			</div>
 		</div>
+		
 		<script LANGUAGE="JavaScript">
 			function confirmSubmit( sMessage ) {
 				var agree=confirm( sMessage );

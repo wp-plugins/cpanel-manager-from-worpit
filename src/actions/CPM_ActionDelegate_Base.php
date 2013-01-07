@@ -164,8 +164,36 @@ class CPM_ActionDelegate_Base {
 	
 	}//createNewFtpUser
 	
+	public function createNewEmailUser( $insEmail, $insPassword, $insDomain, $insQuota ) {
 	
+		$aVars = array();
 	
+		if ( !$this->preActionBasicValidate( $aVars, 'create a new Email User' ) ) {
+			return false;
+		}
+
+		$aArgs = array(
+				'email'		=> $insEmail,
+				'password'	=> $insPassword,
+				'domain'	=> $insDomain,
+				'quota'		=> intval($insQuota)
+		);
+
+		$this->m_oCpanel_Api->doApiFunction( "Email", "addpop", $aArgs );
+		$this->m_oLastApiResponse = $this->m_oCpanel_Api->getLastResponse();
+	
+		if ( Worpit_CPanelTransformer::GetLastSuccess( $this->m_oLastApiResponse ) ) {
+			$fSuccess = true;
+			$this->m_aMessages[] = "Creating new Email User succeeded: ".$insEmail.' | '.$insPassword.' | '.$insDomain.' | '.$insQuota;
+		}
+		else {
+			$fSuccess = false;
+			$this->m_aMessages[] = "Creating new Email User ( $insEmail | $insPassword | $insDomain | $insQuota ) on cPanel account FAILED: ". Worpit_CPanelTransformer::GetLastError( $this->m_oLastApiResponse );
+		}
+	
+		return $fSuccess;
+	
+	}//createNewEmailUser
 	
 	public static function ValidateDatabaseName( $insDatabaseName, &$aMessages ) {
 		
@@ -255,7 +283,7 @@ class CPM_ActionDelegate_Base {
 		return $fValidState;
 	}//ValidateFtpUser
 	
-	public static function ValidateFtpQuota( $insQuota, &$aMessages ) {
+	public static function ValidateQuota( $insQuota, &$aMessages ) {
 	
 		$fValidState = true;
 		if ( !empty( $insQuota ) ) {
@@ -263,16 +291,20 @@ class CPM_ActionDelegate_Base {
 			$insQuota = trim($insQuota);
 	
 			if ( !self::IsNumeric($insQuota) ) {
-				$aMessages[] = "The FTP quota provided ($insQuota) is not a number.";
+				$aMessages[] = "The quota provided ($insQuota) is not a number.";
+				$fValidState = false;
+			}
+			elseif ( (int)$insQuota < 0 ) {
+				$aMessages[] = "The quota provided ($insQuota) is less than zero.";
 				$fValidState = false;
 			}
 		}
 		else {
-			$aMessages[] = "The FTP quota option is blank.";
+			$aMessages[] = "The quota option is blank.";
 			$fValidState = false;
 		}
 		return $fValidState;
-	}//ValidateFtpQuota
+	}//ValidateQuota
 	
 	public static function ValidateDirectory( $insHomedir, &$aMessages ) {
 		
@@ -309,6 +341,9 @@ class CPM_ActionDelegate_Base {
 	}
 	protected static function IsAlphaNumeric( $insString = '' ) {
 		return preg_match( '/^[A-Za-z0-9]+$/', $insString );
+	}
+	protected static function IsValidEmailPart( $insString = '' ) {
+		return preg_match( '/^[A-Za-z0-9-_\.]+$/', $insString );
 	}
 	protected static function IsNumeric( $insString = '' ) {
 		return preg_match( '/^[0-9]+$/', $insString );

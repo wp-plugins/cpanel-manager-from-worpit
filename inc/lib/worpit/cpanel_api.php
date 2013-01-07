@@ -42,11 +42,12 @@ class CPanel_Api {
 		'Fileman'	=> array( 'changeperm', 'fullbackup' ),
 		'Ftp'		=> array( 'getftpquota', 'get_welcomemsg', 'set_welcomemsg' ),
 		'Mysql'		=> array( 'adddb', 'adduser', 'adduserdb', 'deldb', 'deluser'),
-		'Park'		=> array( 'setredirecturl', 'getredirecturl', 'disableredirect' ),
+		'Park'		=> array( 'setredirecturl', 'getredirecturl', 'disableredirect' )
 	);
 	
 	public static $API2_FUNCTIONS = array(
 		'Cron'			=> array( 'listcron', 'add_line', 'remove_line', 'edit_line', 'get_email', 'set_email' ),
+		'Email'			=> array( 'addpop', 'delpop', 'listpopssingle' ),
 		'Fileman'		=> array( 'fileop' ),
 		'Ftp'			=> array( 'addftp', 'delftp', 'listftp', 'listftpwithdisk', 'passwd', 'setquota' ),
 		'MysqlFE'		=> array( 'listdbs', 'listusers', 'listusersindb' ),
@@ -110,13 +111,7 @@ class CPanel_Api {
 	 * "Mysql", "deluser", array( "Username" )
 	 * "Mysql", "deldb", array( "Database Name" )
 	 * "Mysql", "adduserdb", array( "Database Name", "Username", 'all' )
-	 * "Ftp", "addftp"
-				$aArgs = array(
-					'user'		=> $insUsername,
-					'pass'		=> $insPassword,
-					'quota'		=> $iniQuota,
-					'homedir'	=> $insHomedir
-				);
+	 * "Ftp", "addftp", array( 'user' => , 'pass' => , 'quota' => , 'homedir'	=> ) ;
 	 *  
 	 * @param String $insModule
 	 * @param String $insFunction
@@ -168,6 +163,9 @@ class CPanel_Api {
 		return $aData;
 	}
 
+	public function listDnsZones(  ) {
+		$this->m_aLastResponse = $this->m_oXmlApi->xmlapi_query( "listzones" );
+	}
 	
 	public function getDocumentRoot() {
 		$this->m_aLastResponse = $this->m_oXmlApi->api2_query( $this->m_sUsername, "DomainLookup", "getdocroot" );
@@ -279,6 +277,7 @@ class CPanel_Api {
 		$this->m_aLastResponse = $this->m_oXmlApi->api1_query( $this->m_sUsername, "print", "", array( '$CPDATA{\'DOMAIN\'}' ) );
 		return $this->getLastResult();
 	}
+	
 	public function getHomeDirectory() {
 		$this->m_aLastResponse = $this->m_oXmlApi->api1_query( $this->m_sUsername, "print", "", array( '$homedir' ) );
 		return $this->getLastResult();

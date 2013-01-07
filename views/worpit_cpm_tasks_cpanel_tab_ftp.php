@@ -214,9 +214,9 @@ function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
 			<div id="TabsFunctionFtp" class="tabbable tabs-function">
 				<ul class="nav nav-pills">
 					<li class="active"><a href="#FtpInfo" data-toggle="tab"><i class="icon icon-info-sign"></i></a></li>
-					<li><a href="#FtpNewUser" data-toggle="tab"><i class="icon icon-plus-sign"></i> FTP User</a></li>
-					<li><a href="#FtpNewUserBulk" data-toggle="tab"><i class="icon icon-plus-sign"></i> FTP Users (Bulk)</a></li>
-					<li><a href="#FtpDeleteUser" data-toggle="tab"><i class="icon icon-minus-sign"></i> FTP Users</a></li>
+					<li><a href="#FtpNewUser" data-toggle="tab"><i class="icon icon-plus-sign"></i> Add FTP User</a></li>
+					<li><a href="#FtpNewUserBulk" data-toggle="tab"><i class="icon icon-plus-sign"></i> Add FTP Users (Bulk)</a></li>
+					<li><a href="#FtpDeleteUser" data-toggle="tab"><i class="icon icon-minus-sign"></i> Del FTP Users</a></li>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="FtpInfo"><?php echo $aHtml[ 'FtpInfo' ]; ?></div>
