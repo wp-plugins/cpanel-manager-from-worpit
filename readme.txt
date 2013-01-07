@@ -3,8 +3,8 @@ Contributors: paultgoodchild, dlgoodchild
 Donate link: http://worpit.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
-Tested up to: 3.4
-Stable tag: 1.6
+Tested up to: 3.5
+Stable tag: 1.7
 
 == Description ==
 
@@ -12,6 +12,12 @@ The cPanel Manager plugin from [Worpit](http://worpit.com/?src=cpm_readme "Worpi
 offers you the ability to connect to your Web Hosting cPanel account.
 
 Currently you can:
+
+= Email Accounts =
+
+*	View a list of all email accounts for all domains.
+*	Add a new email account to any domain
+*	Delete multiple email accounts.
 
 = MySQL =
 
@@ -116,12 +122,15 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 = TODO =
 
 * Remove some hardcoding for Jump-links and from the cPanel API itself (server port)
-* Add domain name functions - addon/parked domains.
 * add cron job management
 * add file handling and file manager jump links
 * add ability to perform FULL cPanel backup and FTP offsite
 * add ability to perform cPanel backup of MySQL databases and FTP offsite
 * use ajax calls to load only necessary data to reduce API calls.
+
+= 1.7 =
+
+* ADDED: Addon Email management - lists Emails / add new email accounts / delete email accounts.
 
 = 1.6 =
 
@@ -159,26 +168,6 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 
 == Upgrade Notice ==
 
-= 1.6 =
+= 1.7 =
 
-* ADDED: Addon Domain management - lists Addon domains / add new Addon domains / delete Addon domains.
-
-= 1.4 =
-
-* ADDED: Sub Domain management - lists sub domains / add new sub domains / delete sub domains.
-
-= 1.3 =
-
-* ADDED: Ability to add new FTP users in Bulk using comma-separate list of 'username, password, disk-quota'
-
-= 1.2 =
-
-* ADDED: FTP User functionality - adding and deleting
-
-= 1.1 =
-
-* ADDED: Encryption mechanism of sensitive cPanel data through use of a Security Access Key. REQUIRES: PHP mcrypt library extension to be loaded.
-
-= 1.0 =
-
-* First Release.
+* ADDED: Addon Email management - lists Emails / add new email accounts / delete email accounts.
