@@ -8,8 +8,8 @@ ini_set( 'display_errors', 1 );
 <div class="wrap">
 	<div class="bootstrap-wpadmin">
 		<div class="page-header">
-			<a href="http://worpit.com/"><div class="icon32" id="worpit-icon">&nbsp;</div></a>
-			<h2>cPanel Tasks :: cPanel Manager (from Worpit)</h2>
+			<a href="http://www.icontrolwp.com/"><div class="icon32" id="worpit-icon">&nbsp;</div></a>
+			<h2>cPanel Tasks :: cPanel Manager (from iControlWP)</h2>
 		</div>
 		
 		<div class="row">

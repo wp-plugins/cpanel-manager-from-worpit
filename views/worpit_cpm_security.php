@@ -5,8 +5,8 @@ include_once( dirname(__FILE__).DS.'widgets'.DS.'worpit_widgets.php' );
 <div class="wrap">
 	<div class="bootstrap-wpadmin">
 		<div class="page-header">
-			<a href="http://worpit.com/"><div class="icon32" id="worpit-icon">&nbsp;</div></a>
-			<h2>cPanel Manager (from Worpit) :: cPanel Encryption Option</h2>
+			<a href="http://www.icontrolwp.com/"><div class="icon32" id="worpit-icon">&nbsp;</div></a>
+			<h2>cPanel Manager (from iControlWP) :: cPanel Encryption Option</h2>
 		</div>
 		<div class="row">
 			<div class="span9">

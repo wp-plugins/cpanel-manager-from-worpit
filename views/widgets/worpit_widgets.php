@@ -1,40 +1,26 @@
-<?php 
+<?php
+function getWidgetIframeHtml( $insSnippet ) {
 
-	function getWidgetIframeHtml($insSnippet) {
+	$sSubPageNow = isset( $_GET['page'] )? 'page='.$_GET['page'].'&': '';
 
-		$sSubPageNow = isset( $_GET['page'] )? 'page='.$_GET['page'].'&': '';
+	$sWidth = '100%';
+	$sBackgroundColor = "rgba(0, 0, 0, 0)";
+	$sIframeName = 'iframe-hlt-bootstrapcss-'.$insSnippet;
 
-		$sWidth = '100%';
-		$sBackgroundColor = "#ffffff";
-		$sIframeName = 'iframe-hlt-bootstrapcss-'.$insSnippet;
-		switch ( $insSnippet ) {
-			case 'side-widgets':
-				$sHeight = '1200px';
-				break;
-				
-			case 'cbc-side-widgets':
-				$sHeight = '1200px';
-				break;
-				
-			case 'cpm-side-widgets':
-				$sHeight = '1200px';
-				break;
+	if ( strpos( $insSnippet, 'side-widgets') !== false ) {
+		$sHeight = '1200px';
+	}
+	elseif ( strpos( $insSnippet, 'dashboard-widget-developerchannel') !== false ) {
+		$sHeight = '312px';
+	}
+	elseif ( strpos( $insSnippet, 'dashboard-widget-worpit') !== false ) {
+		$sHeight = '230px';
+		$sBackgroundColor = 'whiteSmoke';
+	}
 
-			case 'dashboard-widget-worpit':
-				$sHeight = '230px';
-				$sBackgroundColor = 'whiteSmoke';
-				break;
+	return '<iframe name="'.$sIframeName.'"
+		src="http://www.icontrolwp.com/custom/remote/plugins/hlt-bootstrapcss-plugin-widgets.php?'.$sSubPageNow.'snippet='.$insSnippet.'"
+		width="'.$sWidth.'" height="'.$sHeight.'" frameborder="0" scrolling="no" style="background-color:'.$sBackgroundColor.';" ></iframe>
+	';
 
-			case 'dashboard-widget-developerchannel':
-				$sHeight = '312px';
-				break;
-		}
-
-		return '<iframe name="'.$sIframeName.'"
-			src="http://www.hostliketoast.com/custom/remote/plugins/hlt-bootstrapcss-plugin-widgets.php?'.$sSubPageNow.'snippet='.$insSnippet.'"
-			width="'.$sWidth.'" height="'.$sHeight.'" frameborder="0" scrolling="no" style="background-color:'.$sBackgroundColor.';" ></iframe>
-		';
-		
-	}//getWidgetIframeHtml
-
-?>
+}

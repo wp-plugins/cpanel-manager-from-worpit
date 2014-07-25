@@ -27,7 +27,7 @@ class Worpit_CPanelTransformer {
 	
 	public function __construct( ) { }
 	
-	public static function GetDataFromApi( &$inoCpanel_Api, $insDataExtract, $insModule, $insFunction, $inaArgs = null ) {
+	public static function GetDataFromApi( $inoCpanel_Api, $insDataExtract, $insModule, $insFunction, $inaArgs = null ) {
 		
 		$inoCpanel_Api->doApiFunction( $insModule, $insFunction, $inaArgs );
 		$aResponseData = $inoCpanel_Api->getLastResponse();

@@ -1,6 +1,6 @@
 <?php
 
-function getContent_FtpTab( $inaConnectionData, &$inoCpanelApi ) {
+function getContent_FtpTab( $inaConnectionData, $inoCpanelApi ) {
 	
 	$aHtml = array();
 	$sHtml = '';

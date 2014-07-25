@@ -1,6 +1,6 @@
 <?php
 
-function getContent_MySqlTab( $inaConnectionData, &$inoCpanelApi ) {
+function getContent_MySqlTab( $inaConnectionData, $inoCpanelApi ) {
 	
 	$aHtml = array();
 	$sHtml = '';

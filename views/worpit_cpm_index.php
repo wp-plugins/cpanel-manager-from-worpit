@@ -6,8 +6,8 @@
 	<div class="bootstrap-wpadmin">
 
 	<div class="page-header">
-		<a href="http://worpit.com/"><div class="icon32" id="worpit-icon"><br /></div></a>
-		<h2>Dashboard :: cPanel Manager (from Worpit)</h2>
+		<a href="http://www.icontrolwp.com/"><div class="icon32" id="worpit-icon"><br /></div></a>
+		<h2>Dashboard :: cPanel Manager (from iControlWP)</h2>
 	</div>
 
 	<div class="row">
@@ -27,7 +27,7 @@
 					<p>Help <u>spread the word</u> or check out what else we do ...</p>
 		  		</div>
 		  		<div class="span4" style="margin-top: 20px;">
-					<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://wordpress.org/extend/plugins/cpanel-manager-from-worpit/" data-text="Manage your cPanel hosting from inside your WordPress!" data-via="Worpit" data-size="large" data-hashtags="#cPanel">Tweet</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+					<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://wordpress.org/extend/plugins/cpanel-manager-from-worpit/" data-text="Manage your cPanel hosting from inside your WordPress!" data-via="iControlWP" data-size="large" data-hashtags="#cPanel">Tweet</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 		  		</div>
 		  	</div>
 			<div class="row">

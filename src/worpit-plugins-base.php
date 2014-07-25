@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Copyright (c) 2012 Worpit <support@worpit.com>
+ * Copyright (c) 2014 iControlWP <support@icontrolwp.com>
  * All rights reserved.
  *
- * "cPanel Manager for WordPress, from Worpit" is
+ * "cPanel Manager for WordPress, from iControlWP" is
  * distributed under the GNU General Public License, Version 2,
  * June 1991. Copyright (C) 1989, 1991 Free Software Foundation, Inc., 51 Franklin
  * St, Fifth Floor, Boston, MA 02110, USA
@@ -32,7 +32,7 @@ class Worpit_Plugins_Base_Cpm {
 	static public $PLUGIN_BASENAME;
 	static public $OPTION_PREFIX;
 
-	const ParentTitle		= 'Worpit';
+	const ParentTitle		= 'iControlWP Plugins';
 	const ParentName		= 'cPanel Manager';
 	const ParentPermissions	= 'manage_options';
 	const ParentMenuId		= 'worpit';
@@ -51,13 +51,13 @@ class Worpit_Plugins_Base_Cpm {
 
 	public function __construct() {
 		
-		add_action( 'plugins_loaded', array( &$this, 'onWpPluginsLoaded' ) );
-		add_action( 'init', array( &$this, 'onWpInit' ), 1 );
+		add_action( 'plugins_loaded', array( $this, 'onWpPluginsLoaded' ) );
+		add_action( 'init', array( $this, 'onWpInit' ), 1 );
 		if ( is_admin() ) {
-			add_action( 'admin_init', array( &$this, 'onWpAdminInit' ) );
-			add_action( 'admin_notices', array( &$this, 'onWpAdminNotices' ) );
-			add_action( 'admin_menu', array( &$this, 'onWpAdminMenu' ) );
-			add_action( 'plugin_action_links', array( &$this, 'onWpPluginActionLinks' ), 10, 4 );
+			add_action( 'admin_init', array( $this, 'onWpAdminInit' ) );
+			add_action( 'admin_notices', array( $this, 'onWpAdminNotices' ) );
+			add_action( 'admin_menu', array( $this, 'onWpAdminMenu' ) );
+			add_action( 'plugin_action_links', array( $this, 'onWpPluginActionLinks' ), 10, 4 );
 		}
 		/**
 		 * We make the assumption that all settings updates are successful until told otherwise
@@ -151,7 +151,7 @@ class Worpit_Plugins_Base_Cpm {
 		if ( !empty($this->m_aPluginMenu) ) {
 			foreach ( $this->m_aPluginMenu as $sMenuTitle => $aMenu ) {
 				list( $sMenuItemText, $sMenuItemId, $sMenuCallBack ) = $aMenu;
-				add_submenu_page( $sFullParentMenuId, $sMenuTitle, $sMenuItemText, self::ParentPermissions, $sMenuItemId, array( &$this, $sMenuCallBack ) );
+				add_submenu_page( $sFullParentMenuId, $sMenuTitle, $sMenuItemText, self::ParentPermissions, $sMenuItemId, array( $this, $sMenuCallBack ) );
 			}
 		}
 
@@ -361,6 +361,7 @@ class Worpit_Plugins_Base_Cpm {
 			return '';
 		}
 		$iCount = 0;
+		$sCollated = '';
 		foreach ( $aAllOptions as $aOptionsSection ) {
 			
 			if ( $iCount == 0 ) {
@@ -385,6 +386,7 @@ class Worpit_Plugins_Base_Cpm {
 			return '';
 		}
 		$iCount = 0;
+		$sCollated = '';
 		foreach ( $aOptionsSection['section_options'] as $aOption ) {
 
 			list($sKey, $fill1, $fill2, $sType) =  $aOption;
@@ -407,7 +409,7 @@ class Worpit_Plugins_Base_Cpm {
 		}
 
 		return false;
-	}//isWorpitPluginAdminPage
+	}
 	
 	protected function deleteAllPluginDbOptions() {
 
@@ -444,7 +446,7 @@ class Worpit_Plugins_Base_Cpm {
 		return add_option( self::$OPTION_PREFIX.$insKey, $insValue );
 	}
 
-	static public function updateOption( $insKey, $insValue ) {
+	public function updateOption( $insKey, $insValue ) {
 		if ( self::getOption( $insKey ) == $insValue ) {
 			return true;
 		}
@@ -470,25 +472,4 @@ class Worpit_Plugins_Base_Cpm {
 		}
 	}
 
-	/**
-	 * Takes an array, an array key, and a default value. If key isn't set, sets it to default.
-	 */
-	protected function def( &$aSrc, $insKey, $insValue = '' ) {
-		if ( !isset( $aSrc[$insKey] ) ) {
-			$aSrc[$insKey] = $insValue;
-		}
-	}
-	/**
-	 * Takes an array, an array key and an element type. If value is empty, sets the html element
-	 * string to empty string, otherwise forms a complete html element parameter.
-	 *
-	 * E.g. noEmptyElement( aSomeArray, sSomeArrayKey, "style" )
-	 * will return String: style="aSomeArray[sSomeArrayKey]" or empty string.
-	 */
-	protected function noEmptyElement( &$inaArgs, $insAttrKey, $insElement = '' ) {
-		$sAttrValue = $inaArgs[$insAttrKey];
-		$insElement = ( $insElement == '' )? $insAttrKey : $insElement;
-		$inaArgs[$insAttrKey] = ( empty($sAttrValue) ) ? '' : ' '.$insElement.'="'.$sAttrValue.'"';
-	}
-
-}//Worpit_Plugins_Base Class
+}

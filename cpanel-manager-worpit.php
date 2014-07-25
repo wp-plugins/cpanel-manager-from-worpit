@@ -1,18 +1,18 @@
 <?php
 /*
-Plugin Name: cPanel Manager (from Worpit)
-Plugin URI: http://worpit.com/
+Plugin Name: cPanel Manager (from iControlWP)
+Plugin URI: http://www.icontrolwp.com/
 Description: A tool to connect to your Web Hosting cPanel account from within your WordPress.
-Version: 1.7
-Author: Worpit
-Author URI: http://worpit.com/
+Version: 1.8
+Author: iControlWP
+Author URI: http://www.icontrolwp.com/
 */
 
 /**
- * Copyright (c) 2012 Worpit <support@worpit.com>
+ * Copyright (c) 2014 iControlWP <support@icontrolwp.com>
  * All rights reserved.
  *
- * "cPanel Manager for WordPress, from Worpit" is
+ * "cPanel Manager for WordPress, from iControlWP" is
  * distributed under the GNU General Public License, Version 2,
  * June 1991. Copyright (C) 1989, 1991 Free Software Foundation, Inc., 51 Franklin
  * St, Fifth Floor, Boston, MA 02110, USA
@@ -34,7 +34,7 @@ define( 'DS', DIRECTORY_SEPARATOR );
 include_once( dirname(__FILE__).'/src/worpit-plugins-base.php' );
 include_once( dirname(__FILE__).'/inc/lib/worpit/Worpit_CPanelTransformer.php' );
 
-class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
+class ICWP_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	
 	const OptionPrefix	= 'cpm_';
 	const SecurityAccessKeyCookieName = "worpitsakcook";
@@ -53,10 +53,9 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	public function __construct(){
 		parent::__construct();
 
-		register_activation_hook( __FILE__, array( &$this, 'onWpActivatePlugin' ) );
-		register_deactivation_hook( __FILE__, array( &$this, 'onWpDeactivatePlugin' ) );
-	//	register_uninstall_hook( __FILE__, array( &$this, 'onWpUninstallPlugin' ) );
-		
+		register_activation_hook( __FILE__, array( $this, 'onWpActivatePlugin' ) );
+		register_deactivation_hook( __FILE__, array( $this, 'onWpDeactivatePlugin' ) );
+
 		self::$PLUGIN_NAME	= basename(__FILE__);
 		self::$PLUGIN_PATH	= plugin_basename( dirname(__FILE__) );
 		self::$PLUGIN_DIR	= WP_PLUGIN_DIR.DS.self::$PLUGIN_PATH.DS;
@@ -189,7 +188,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		check_admin_referer( $this->getSubmenuId('security') );
 		
 		if ( isset( $_POST['submit_remove_access'] ) ) {
-			$this->turnSecureAccessOff( $sEncryptionSalt );
+			$this->turnSecureAccessOff();
 			return;
 		}
 		
@@ -199,8 +198,8 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 			$this->updateOption( 'cpanel_username', '' );
 			$this->updateOption( 'cpanel_password', '' );
 			
-			$this->turnSecureAccessOff( $sEncryptionSalt );
-			
+			$this->turnSecureAccessOff();
+
 			$this->m_aSubmitSuccess = true;
 			$this->m_aSubmitMessages[] = "Your Security Access Key, cPanel username, and cPanel password were all reset.";
 			return;
@@ -367,8 +366,8 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		
 		//Specify what set of options are available for this page
 		$aAvailableOptions = array(
-				&$this->m_aPluginOptions_EnableSection,
-				&$this->m_aPluginOptions_CpmCredentialsSection,
+			&$this->m_aPluginOptions_EnableSection,
+			&$this->m_aPluginOptions_CpmCredentialsSection
 		);
 		
 		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_EnableSection );
@@ -419,18 +418,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 			'form_action'		=> 'admin.php?page='.$this->getFullParentMenuId().'-tasks'
 		);
 		$this->display( 'worpit_cpm_tasks', $aData );
-	}//onDisplayCpmCpanelTasks
-	
-	protected function initShortcodes() {
-	
-		$this->defineShortcodes();
-		
-		if ( function_exists('add_shortcode') && !empty( $this->m_aShortcodes ) ) {
-			foreach( $this->m_aShortcodes as $shortcode => $function_to_call ) {
-				add_shortcode($shortcode, array(&$this, $function_to_call) );
-			}//foreach
-		}
-	}//initShortcodes
+	}
 
 	/**
 	 * Add desired shortcodes to this array.
@@ -533,7 +521,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 	 * @param $insValue
 	 */
 	private function updateOptionEncrypted( $insKey, $insValue ) {
-		return self::updateOption( $insKey, $this->encryptOptionValue($insValue) );
+		return $this->updateOption( $insKey, $this->encryptOptionValue($insValue) );
 	}
 	
 	private function encryptOptionValue( $insValue ) {
@@ -546,7 +534,7 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		$_COOKIE[ self::SecurityAccessKeyCookieName ] = $sAccessKey;
 		setcookie( self::SecurityAccessKeyCookieName, $sAccessKey, time()+3600, COOKIEPATH, COOKIE_DOMAIN, false );
 	}
-	private function turnSecureAccessOff( ) {
+	private function turnSecureAccessOff() {
 		unset( $_COOKIE[ self::SecurityAccessKeyCookieName ] );
 		setcookie( self::SecurityAccessKeyCookieName, "", time()-3600, COOKIEPATH, COOKIE_DOMAIN, false);
 	}
@@ -599,7 +587,6 @@ class Worpit_CpanelManagerWordPress extends Worpit_Plugins_Base_Cpm {
 		return true;
 	}
 	
-}//CLASS
+}
 
-
-new Worpit_CpanelManagerWordPress( );
+new ICWP_CpanelManagerWordPress( );

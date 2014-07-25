@@ -1,6 +1,6 @@
 <?php
 
-function getContent_DomainsTab( $inaConnectionData, &$inoCpanelApi ) {
+function getContent_DomainsTab( $inaConnectionData, $inoCpanelApi ) {
 	
 	$aHtml = array();
 	$sHtml = '';

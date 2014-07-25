@@ -190,7 +190,7 @@ function validateConnection( $inaData = array(), &$outaMessage = '' ) {
 	return $oCpanelApi;
 }
 
-function getCpanelInfoHtml( $inaConnectionData, &$inoCpanelApi, $insModule, $insFunction, $insKey, $insTitle ) {
+function getCpanelInfoHtml( $inaConnectionData, $inoCpanelApi, $insModule, $insFunction, $insKey, $insTitle ) {
 
 	$sHtml = '<div class="well">';
 	$sHtml .= "<h3>$insTitle</h3>";
@@ -219,7 +219,7 @@ function getCpanelInfoHtml( $inaConnectionData, &$inoCpanelApi, $insModule, $ins
 	return $sHtml;
 }
 
-function getBasicDataListArray(&$inoCpanelApi, $insModule, $insFunction, $insKey) {
+function getBasicDataListArray( $inoCpanelApi, $insModule, $insFunction, $insKey) {
 	$aData = Worpit_CPanelTransformer::GetDataFromApi( $inoCpanelApi, 'data', $insModule, $insFunction );
 	
 	if ( !empty($aData) ) {

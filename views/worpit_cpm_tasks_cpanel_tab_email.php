@@ -1,6 +1,6 @@
 <?php
 
-function getContent_EmailTab( $inaConnectionData, &$inoCpanelApi ) {
+function getContent_EmailTab( $inaConnectionData, $inoCpanelApi ) {
 	
 	$aHtml = array();
 	$sHtml = '';

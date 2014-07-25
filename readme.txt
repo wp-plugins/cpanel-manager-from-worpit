@@ -1,14 +1,14 @@
-=== cPanel Manager (from Worpit) ===
+=== cPanel Manager (from iControlWP) ===
 Contributors: paultgoodchild, dlgoodchild
-Donate link: http://worpit.com/
+Donate link: http://www.icontrolwp.com/
 Tags: cPanel, manage
 Requires at least: 3.2.0
-Tested up to: 3.5
-Stable tag: 1.7
+Tested up to: 3.9
+Stable tag: 1.8
 
 == Description ==
 
-The cPanel Manager plugin from [Worpit](http://worpit.com/?src=cpm_readme "Worpit: Manage Muliple WordPress Sites Better") 
+The cPanel Manager plugin from [iControlWP](http://www.icontrolwp.com/?src=cpm_readme "iControlWP: Manage Muliple WordPress Sites Better")
 offers you the ability to connect to your Web Hosting cPanel account.
 
 Currently you can:
@@ -107,15 +107,15 @@ Use the MySQL database delete and MySQL user delete functionality with GREAT CAR
 
 The cPanel Manager is very easy to use right now because there isn't much functionality.
 
-But, documentation is coming. I wanted to get this work out to the public first, [get feedback](http://worpit.com/help-support/?src=wporg "Worpit: Manage Muliple WordPress Sites Better")
+But, documentation is coming. I wanted to get this work out to the public first, [get feedback](http://www.icontrolwp.com/help-support/?src=wporg "iControlWP: Manage Muliple WordPress Sites Better")
 and then move on from there.
 
 = Do you make any other plugins? =
 
-Yes, we created the only [Twitter Bootstrap WordPress](http://worpit.com/wordpress-twitter-bootstrap-css-plugin-home/ "Twitter Bootstrap WordPress Plugin")
+Yes, we created the only [Twitter Bootstrap WordPress](http://www.icontrolwp.com/wordpress-twitter-bootstrap-css-plugin-home/ "Twitter Bootstrap WordPress Plugin")
 plugin with over 20,000 downloads so far.
 
-We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://worpit.com/?src=wporg) for people with multiple WordPress sites to manage.
+We also created the [Manage Multiple WordPress Site Better Tool: iControlWP](http://www.icontrolwp.com/?src=wporg) for people with multiple WordPress sites to manage.
 
 == Changelog ==
 
@@ -127,6 +127,11 @@ We also created the [Manage Multiple WordPress Site Better Tool: Worpit](http://
 * add ability to perform FULL cPanel backup and FTP offsite
 * add ability to perform cPanel backup of MySQL databases and FTP offsite
 * use ajax calls to load only necessary data to reduce API calls.
+
+= 1.8 =
+
+* FIX: Compatibility with PHP 5.4 and other errors
+* FIX: Compatibility with WordPress 3.9+
 
 = 1.7 =
 
